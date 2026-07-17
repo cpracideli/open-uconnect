@@ -1,0 +1,9 @@
+# Dados sensíveis
+.env
+
+# Resultados de testes / exports
+uconnect-result-*.json
+notifications-raw-*.json
+
+# Node
+node_modules/

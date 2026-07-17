@@ -1,0 +1,26 @@
+{
+  "name": "uconnect-api",
+  "version": "1.0.0",
+  "description": "Script para autenticação e acesso à API Uconnect Jeep",
+  "main": "uconnect-api.js",
+  "scripts": {
+    "start":     "node server.js",
+    "dev":       "node server.js",
+    "api":       "node uconnect-api.js",
+    "test":      "node test-simple.js"
+  },
+  "keywords": [
+    "uconnect",
+    "jeep",
+    "api",
+    "automotive",
+    "vehicle"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

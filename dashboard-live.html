@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uconnect Dashboard — 23/06/2026, 22:31:21</title>
+  <style>
+    :root {
+      --bg:       #0d0f14;
+      --surface:  #161b26;
+      --card:     #1e2535;
+      --border:   #2a3347;
+      --accent:   #e63312;
+      --accent2:  #ff6b35;
+      --text:     #e8eaf0;
+      --muted:    #7a859a;
+      --ok:       #22c55e;
+      --warn:     #f59e0b;
+      --danger:   #ef4444;
+      --radius:   14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, var(--accent) 0%, #a01f0a 100%);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 4px 24px rgba(230,51,18,.35);
+    }
+    header svg { flex-shrink: 0; }
+    header h1  { font-size: 1.5rem; font-weight: 700; letter-spacing: .5px; }
+    header p   { font-size: .85rem; opacity: .8; margin-top: 2px; }
+    #last-update { margin-left: auto; font-size: .78rem; opacity: .75; text-align: right; }
+
+    /* ── Loading / Error ── */
+    #loading, #error-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 16px;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #error-box { color: var(--danger); }
+    #error-box pre { background: var(--card); padding: 16px; border-radius: var(--radius); font-size: .8rem; max-width: 600px; overflow: auto; }
+
+    /* ── Main grid ── */
+    main { max-width: 1100px; margin: 0 auto; padding: 32px 20px; display: none; }
+
+    /* ── Vehicle hero ── */
+    .vehicle-hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+    .vehicle-icon { font-size: 4rem; line-height: 1; }
+    .vehicle-name { font-size: 1.6rem; font-weight: 700; }
+    .vehicle-sub  { color: var(--muted); font-size: .9rem; margin-top: 4px; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .4px;
+      background: rgba(34,197,94,.15);
+      color: var(--ok);
+      border: 1px solid rgba(34,197,94,.3);
+      margin-top: 8px;
+    }
+
+    /* ── Grid cards ── */
+    .grid { display: grid; gap: 20px; }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .card-title {
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── Stat ── */
+    .stat-value { font-size: 2.2rem; font-weight: 700; line-height: 1; }
+    .stat-unit  { font-size: .85rem; color: var(--muted); margin-top: 4px; }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+      background: var(--border);
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    .progress-bar {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .6s ease;
+    }
+    .bar-ok     { background: linear-gradient(90deg, var(--ok), #16a34a); }
+    .bar-warn   { background: linear-gradient(90deg, var(--warn), #d97706); }
+    .bar-danger { background: linear-gradient(90deg, var(--danger), #b91c1c); }
+
+    /* ── Tyre grid ── */
+    .tyre-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .tyre-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .tyre-item.warn {
+      border-color: var(--danger);
+      background: rgba(239,68,68,.08);
+    }
+    .tyre-label  { font-size: .7rem; color: var(--muted); font-weight: 600; letter-spacing: .5px; }
+    .tyre-value  { font-size: 1.3rem; font-weight: 700; margin: 4px 0; }
+    .tyre-status { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .status-ok     { color: var(--ok); }
+    .status-warn   { color: var(--danger); }
+
+    /* ── Battery ── */
+    .battery-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .battery-body {
+      flex: 1;
+      height: 30px;
+      background: var(--border);
+      border-radius: 6px;
+      border: 2px solid var(--muted);
+      position: relative;
+      overflow: visible;
+    }
+    .battery-body::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 14px;
+      background: var(--muted);
+      border-radius: 0 3px 3px 0;
+    }
+    .battery-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--ok), #16a34a);
+    }
+    .battery-text {
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    /* ── Trips ── */
+    .trip-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .trip-row:last-child { border-bottom: none; }
+    .trip-name { font-weight: 600; font-size: .9rem; }
+    .trip-dist { font-size: 1.1rem; font-weight: 700; color: var(--accent2); }
+    .trip-eff  { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Info table ── */
+    .info-table { width: 100%; border-collapse: collapse; }
+    .info-table tr { border-bottom: 1px solid var(--border); }
+    .info-table tr:last-child { border-bottom: none; }
+    .info-table td { padding: 9px 4px; font-size: .88rem; }
+    .info-table td:first-child { color: var(--muted); width: 45%; }
+    .info-table td:last-child  { font-weight: 600; }
+
+    /* ── Services ── */
+    .services-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+    .svc-chip {
+      font-size: .7rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 99px;
+      border: 1px solid;
+      letter-spacing: .3px;
+    }
+    .svc-on  { color: var(--ok);   border-color: rgba(34,197,94,.4);  background: rgba(34,197,94,.08); }
+    .svc-off { color: var(--muted); border-color: var(--border);      background: transparent; }
+
+    /* ── Refresh button ── */
+    .refresh-wrap { text-align: center; margin-top: 32px; }
+    #btn-refresh {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 99px;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    #btn-refresh:hover { opacity: .85; }
+    #btn-refresh:disabled { opacity: .4; cursor: default; }
+
+    /* ── Section header ── */
+    .section-title {
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      margin: 32px 0 14px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <!-- Jeep-like icon -->
+  <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+    <rect width="38" height="38" rx="10" fill="rgba(255,255,255,.15)"/>
+    <path d="M8 12h22M8 19h22M8 26h22" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="13" cy="30" r="3" fill="#fff"/>
+    <circle cx="25" cy="30" r="3" fill="#fff"/>
+  </svg>
+  <div>
+    <h1>Uconnect Dashboard</h1>
+    <p>Jeep Compass — Dados em tempo real</p>
+  </div>
+  <div id="last-update">—</div>
+</header>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p>Buscando dados do veículo…</p>
+</div>
+
+<div id="error-box" style="display:none">
+  <span style="font-size:2.5rem">⚠️</span>
+  <strong>Erro ao carregar dados</strong>
+  <pre id="error-msg"></pre>
+  <button id="btn-retry" style="background:var(--accent);color:#fff;border:none;padding:10px 28px;border-radius:99px;cursor:pointer;font-size:.9rem">Tentar novamente</button>
+</div>
+
+<main id="main">
+
+  <!-- Vehicle hero -->
+  <div class="vehicle-hero" id="hero"></div>
+
+  <!-- Key metrics -->
+  <p class="section-title">📊 Status Atual</p>
+  <div class="grid grid-4" id="metrics"></div>
+
+  <!-- Tyres + Trips -->
+  <p class="section-title">🔧 Detalhes</p>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">🛞 Pressão dos Pneus</div>
+      <div class="tyre-grid" id="tyres"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🗺️ Viagens</div>
+      <div id="trips"></div>
+    </div>
+  </div>
+
+  <!-- Vehicle info + Services -->
+  <p class="section-title">🚗 Informações do Veículo</p>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">🪪 Identificação</div>
+      <table class="info-table" id="veh-info"></table>
+    </div>
+    <div class="card">
+      <div class="card-title">⚙️ Serviços Ativos</div>
+      <div class="services-wrap" id="services"></div>
+    </div>
+  </div>
+
+  <div class="refresh-wrap">
+    <button id="btn-refresh">🔄 Atualizar dados</button>
+  </div>
+
+</main>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+// O script Node.js gera o JSON — aqui lemos o arquivo mais recente via fetch
+// OU, se abrir localmente como file://, usamos os dados embutidos diretamente.
+// Para uso real com servidor (ex: npx serve .), o endpoint /api/data é preferido.
+
+const API_ENDPOINT = null; // ex: 'http://localhost:3000/api/data'
+const JSON_FILE    = null; // ex: 'uconnect-result-1782264487381.json'
+                           // deixe null para usar dados embutidos abaixo
+
+// ─── DADOS EMBUTIDOS (atualizados pelo script Node.js) ───────────────────────
+// Execute: node uconnect-api.js && node embed-data.js   (veja instrução abaixo)
+// Ou substitua manualmente o conteúdo de EMBEDDED_DATA com o JSON mais recente.
+let EMBEDDED_DATA = null;
+try {
+  EMBEDDED_DATA = JSON.parse(`{
+  "timestamp": "2026-06-24T01:28:07.381Z",
+  "userId": "a8ccd0e04c1d4e4ea9b91779f18d0f17",
+  "vehicles": [
+    {
+      "color": "CINZA GRANITE CRYSTAL BICOLOR",
+      "year": 2022,
+      "tsoBodyCode": "M1",
+      "navEnabledHU": false,
+      "isCompanyCar": false,
+      "radio": "",
+      "vin": "98867516TNKL53814",
+      "company": "FCA",
+      "model": "675",
+      "tcuType": "2",
+      "make": "Jeep",
+      "brandCode": "57",
+      "soldRegion": "LATAM",
+      "svla": {
+        "status": "INACTIVE",
+        "timestamp": 0
+      },
+      "market": "BR",
+      "modelDescription": "COMPASS",
+      "fuelType": "G",
+      "tsoModelYear": "2022",
+      "sdp": "IGNITE",
+      "subMake": "Jeep",
+      "regStatus": "COMPLETED_STAGE_3",
+      "language": "",
+      "customerRegStatus": "Y",
+      "activationSource": "DEALER",
+      "nickname": "",
+      "regTimestamp": 1778513130349,
+      "services": [
+        {
+          "vehicleCapable": true,
+          "service": "SVLAAPP",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "SVLA",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ROLIGHTS",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ROHVAC",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "ROC",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "RDU",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "RDL",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "HUC",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "AOTAC",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "BCALL",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "SOS",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "ASSIST",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "ECALL",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "HBLF",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "ASOS",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "DTC",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": false,
+          "service": "NAV_OB_FUEL_FINDER",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "NAV_OB_PARKING_FINDER",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "NAV_OB_ROUTE_DRM",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "NAV_OB_SEARCH",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "NAV_OB_SPEED_CAMERA",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "NAV_OB_TRAFFIC",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": false,
+          "service": "NAV_OB_WEATHER",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "PARENT",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "REOFF",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "REON",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": false,
+          "service": "SDV",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "SQDF",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "TA",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "VF",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "VHSG",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "VRC",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "WIFIHOTSPOT",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ECODRIVE",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "FTD",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "UBI",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "IVM",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": false,
+          "service": "PHEV",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ALEXAVA",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "WIFIP",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": false,
+          "service": "VHS",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "CNOW",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "CSL",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "EVNOT",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ELECPAGES",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ORP",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "LASTMILE",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "AOTACI",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": true,
+          "service": "ROCRANKINHIBITON",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "ROCRANKINHIBITOFF",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "TA_SUP",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "NAV_OB_MOTA_CELL",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": false,
+          "service": "NAV_OB_MOTA_WIFI",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "NAV_OB_MOTA_WIFI_CELL",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ECOSERVICE",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ECOCOACHINGR1",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "CPPLUS",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "DEEPREFRESH",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ECOCOACHING20",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ADA_TBM",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "EVROUT",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ROC2",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ADA_UBI",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ADA_FTD",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "TRIPREPORT",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "RVS",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "CPA",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "BRDCMBNG",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": true,
+          "service": "SVC_SCHEDULE",
+          "serviceEnabled": true
+        },
+        {
+          "vehicleCapable": false,
+          "service": "APPSTORE",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "IGNITEHOST",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ADA_HU",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "NAV_OB_ROUTE_DRM15",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "T_SPAAK",
+          "serviceEnabled": false
+        },
+        {
+          "vehicleCapable": false,
+          "service": "ACV",
+          "serviceEnabled": false
+        }
+      ],
+      "enrollmentStatus": "COMPLETE",
+      "channelFeatures": [
+        {
+          "featureCode": "f_0097_L",
+          "channels": [
+            "CWP",
+            "GMA"
+          ]
+        }
+      ],
+      "privacyMode": "INACTIVE",
+      "tc": {
+        "activation": {
+          "status": "Accepted",
+          "version": "us1.0.1"
+        },
+        "registration": {
+          "status": "Accepted",
+          "version": "1.0.1"
+        }
+      }
+    }
+  ],
+  "status": {
+    "98867516TNKL53814": {
+      "vehicleInfo": {
+        "totalRangeADA": null,
+        "distanceUnit": "km",
+        "odometer": {
+          "odometer": {
+            "value": "57416",
+            "unit": "km"
+          }
+        },
+        "daysToService": "null",
+        "hvbatSOH": null,
+        "fuel": {
+          "fuelAmountLevel": 93,
+          "isFuelLevelLow": false,
+          "distanceToEmpty": {
+            "value": "435",
+            "unit": "km"
+          },
+          "fuelAmount": {
+            "value": "49.0",
+            "unit": "l"
+          }
+        },
+        "oilLevel": {
+          "oilLevel": null
+        },
+        "tyrePressure": [
+          {
+            "warning": false,
+            "pressure": {
+              "value": "230.57155799999995",
+              "unit": "kPa"
+            },
+            "type": "FL",
+            "status": "NORMAL"
+          },
+          {
+            "warning": false,
+            "pressure": {
+              "value": "233.3164575",
+              "unit": "kPa"
+            },
+            "type": "FR",
+            "status": "NORMAL"
+          },
+          {
+            "warning": true,
+            "pressure": {
+              "value": "189.3980655",
+              "unit": "kPa"
+            },
+            "type": "RL",
+            "status": "SIGNIFICANTLY_LOW"
+          },
+          {
+            "warning": false,
+            "pressure": {
+              "value": "211.3572615",
+              "unit": "kPa"
+            },
+            "type": "RR",
+            "status": "NORMAL"
+          }
+        ],
+        "batteryInfo": {
+          "highVoltageBatterylevel": null,
+          "batteryStateOfChargeEnhanced": null,
+          "eventType": null,
+          "batteryStatus": "0",
+          "batteryVoltage": {
+            "value": "14.5",
+            "unit": "volts"
+          },
+          "batteryStateOfCharge": "null"
+        },
+        "tripsInfo": {
+          "trips": [
+            {
+              "totalElectricDistance": {
+                "value": "null",
+                "unit": "km"
+              },
+              "name": "TripA",
+              "totalDistance": {
+                "value": "10395",
+                "unit": "km"
+              },
+              "energyUsed": {
+                "value": "6",
+                "unit": "kmpl"
+              },
+              "averageEnergyUsed": {
+                "value": "6",
+                "unit": "kmpl"
+              },
+              "totalHybridDistance": {
+                "value": "null",
+                "unit": "km"
+              }
+            },
+            {
+              "totalElectricDistance": {
+                "value": "null",
+                "unit": "km"
+              },
+              "name": "TripB",
+              "totalDistance": {
+                "value": "93",
+                "unit": "km"
+              },
+              "energyUsed": {
+                "value": "7",
+                "unit": "kmpl"
+              },
+              "averageEnergyUsed": {
+                "value": "7",
+                "unit": "kmpl"
+              },
+              "totalHybridDistance": {
+                "value": "null",
+                "unit": "km"
+              }
+            }
+          ]
+        },
+        "batPwrUsageDisp": null,
+        "estRange": null,
+        "distanceToService": {
+          "distanceToService": {
+            "value": "1604.0",
+            "unit": "km"
+          }
+        },
+        "wheelCount": 4,
+        "hvacPwrUsageDisp": null,
+        "mtrPwrUsageDisp": null,
+        "tpmsvehicle": true,
+        "isTPMSVehicle": true,
+        "HVBatSOH": null,
+        "timestamp": 1782249854955
+      },
+      "timestamp": 1782249854955
+    }
+  }
+}`);
+} catch(e) {
+  EMBEDDED_DATA = null;
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function el(id) { return document.getElementById(id); }
+
+function barClass(pct) {
+  if (pct >= 50) return 'bar-ok';
+  if (pct >= 25) return 'bar-warn';
+  return 'bar-danger';
+}
+
+function colorByPct(pct) {
+  if (pct >= 50) return 'var(--ok)';
+  if (pct >= 25) return 'var(--warn)';
+  return 'var(--danger)';
+}
+
+function tyrePos(code) {
+  const map = { FL: 'Dianteiro Esq.', FR: 'Dianteiro Dir.', RL: 'Traseiro Esq.', RR: 'Traseiro Dir.' };
+  return map[code] || code;
+}
+
+function fuelColor(pct) {
+  if (pct >= 40) return 'bar-ok';
+  if (pct >= 20) return 'bar-warn';
+  return 'bar-danger';
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function render(data) {
+  const vehicle = data.vehicles[0];
+  const vin     = vehicle.vin;
+  const info    = data.status[vin].vehicleInfo;
+  const ts      = new Date(data.timestamp);
+
+  // Last update
+  el('last-update').innerHTML = `Atualizado em<br><strong>${ts.toLocaleString('pt-BR')}</strong>`;
+
+  // ── Hero ──
+  el('hero').innerHTML = `
+    <div class="vehicle-icon">🚙</div>
+    <div>
+      <div class="vehicle-name">${vehicle.make} ${vehicle.modelDescription} ${vehicle.year}</div>
+      <div class="vehicle-sub">${vehicle.color} &nbsp;·&nbsp; VIN: ${vin}</div>
+      <span class="badge">✓ ${vehicle.regStatus.replace(/_/g,' ')}</span>
+    </div>
+  `;
+
+  // ── Métricas ──
+  const fuelPct  = info.fuel.fuelAmountLevel;
+  const odo      = parseInt(info.odometer.odometer.value).toLocaleString('pt-BR');
+  const dte      = info.fuel.distanceToEmpty.value;
+  const batV     = info.batteryInfo.batteryVoltage.value;
+  const dts      = parseFloat(info.distanceToService?.distanceToService?.value || 0).toLocaleString('pt-BR');
+
+  el('metrics').innerHTML = `
+    <!-- Combustível -->
+    <div class="card">
+      <div class="card-title">⛽ Combustível</div>
+      <div class="stat-value" style="color:${colorByPct(fuelPct)}">${fuelPct}<span style="font-size:1rem">%</span></div>
+      <div class="stat-unit">${info.fuel.fuelAmount.value} litros restantes</div>
+      <div class="progress-wrap" style="margin-top:14px">
+        <div class="progress-bar ${fuelColor(fuelPct)}" style="width:${fuelPct}%"></div>
+      </div>
+    </div>
+
+    <!-- Autonomia -->
+    <div class="card">
+      <div class="card-title">🛣️ Autonomia Restante</div>
+      <div class="stat-value">${parseInt(dte).toLocaleString('pt-BR')}</div>
+      <div class="stat-unit">km até o tanque vazio</div>
+    </div>
+
+    <!-- Odômetro -->
+    <div class="card">
+      <div class="card-title">📍 Odômetro</div>
+      <div class="stat-value">${odo}</div>
+      <div class="stat-unit">km rodados no total</div>
+    </div>
+
+    <!-- Próxima revisão -->
+    <div class="card">
+      <div class="card-title">🔧 Próxima Revisão</div>
+      <div class="stat-value" style="font-size:1.7rem">${dts}</div>
+      <div class="stat-unit">km restantes para revisão</div>
+      <div style="margin-top:12px;display:flex;align-items:center;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="var(--muted)" stroke-width="1.5"/><path d="M8 5v3.5l2 1.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span style="font-size:.78rem;color:var(--muted)">Bateria: ${batV} V</span>
+      </div>
+    </div>
+  `;
+
+  // ── Pneus ──
+  const tyreOrder = ['FL','FR','RL','RR'];
+  el('tyres').innerHTML = tyreOrder.map(pos => {
+    const t = info.tyrePressure.find(x => x.type === pos);
+    if (!t) return '';
+    const psi  = (parseFloat(t.pressure.value) / 6.895).toFixed(1);
+    const kpa  = parseFloat(t.pressure.value).toFixed(1);
+    const warn = t.warning;
+    return `
+      <div class="tyre-item ${warn ? 'warn' : ''}">
+        <div class="tyre-label">${tyrePos(pos)}</div>
+        <div class="tyre-value">${kpa}</div>
+        <div style="font-size:.65rem;color:var(--muted)">kPa &nbsp;(${psi} psi)</div>
+        <div class="tyre-status ${warn ? 'status-warn' : 'status-ok'}">${warn ? '⚠ '+t.status.replace(/_/g,' ') : '✓ Normal'}</div>
+      </div>
+    `;
+  }).join('');
+
+  // ── Viagens ──
+  el('trips').innerHTML = info.tripsInfo.trips.map(t => `
+    <div class="trip-row">
+      <div>
+        <div class="trip-name">${t.name}</div>
+        <div class="trip-eff">Eficiência: ${t.averageEnergyUsed.value} ${t.averageEnergyUsed.unit}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="trip-dist">${parseInt(t.totalDistance.value).toLocaleString('pt-BR')} km</div>
+      </div>
+    </div>
+  `).join('');
+
+  // ── Info do veículo ──
+  const rows = [
+    ['Marca',       `${vehicle.make} / ${vehicle.subMake}`],
+    ['Modelo',      `${vehicle.modelDescription} (${vehicle.model})`],
+    ['Ano',         vehicle.year],
+    ['Combustível', vehicle.fuelType === 'G' ? 'Gasolina' : vehicle.fuelType],
+    ['Mercado',     vehicle.market],
+    ['VIN',         `<span style="font-family:monospace;font-size:.82rem">${vin}</span>`],
+    ['Plataforma',  vehicle.sdp],
+    ['Empresa',     vehicle.company],
+  ];
+  el('veh-info').innerHTML = rows.map(([k,v]) => `
+    <tr><td>${k}</td><td>${v}</td></tr>
+  `).join('');
+
+  // ── Serviços ──
+  const enabledSvcs = vehicle.services
+    .filter(s => s.vehicleCapable && s.serviceEnabled)
+    .map(s => s.service);
+  const disabledSvcs = vehicle.services
+    .filter(s => s.vehicleCapable && !s.serviceEnabled)
+    .map(s => s.service);
+
+  el('services').innerHTML =
+    enabledSvcs.map(s => `<span class="svc-chip svc-on">✓ ${s}</span>`).join('') +
+    disabledSvcs.map(s => `<span class="svc-chip svc-off">${s}</span>`).join('');
+
+  // Mostrar
+  el('loading').style.display = 'none';
+  el('error-box').style.display = 'none';
+  el('main').style.display = 'block';
+}
+
+// ─── LOAD DATA ───────────────────────────────────────────────────────────────
+async function loadData() {
+  el('loading').style.display = 'flex';
+  el('error-box').style.display = 'none';
+  el('main').style.display = 'none';
+  el('btn-refresh').disabled = true;
+
+  try {
+    let data;
+
+    if (API_ENDPOINT) {
+      // Modo servidor — chama endpoint REST
+      const res = await fetch(API_ENDPOINT);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+
+    } else if (JSON_FILE) {
+      // Modo local — carrega arquivo JSON (precisa de servidor HTTP, não funciona em file://)
+      const res = await fetch(JSON_FILE);
+      if (!res.ok) throw new Error(`Arquivo "${JSON_FILE}" não encontrado.`);
+      data = await res.json();
+
+    } else if (EMBEDDED_DATA) {
+      // Modo embutido — dados injetados diretamente no HTML
+      data = EMBEDDED_DATA;
+
+    } else {
+      throw new Error(
+        'Nenhuma fonte de dados configurada.\n\n' +
+        'Opções:\n' +
+        '1. Execute: node inject-dashboard.js   (recomendado)\n' +
+        '2. Configure JSON_FILE com o nome do arquivo JSON gerado\n' +
+        '3. Configure API_ENDPOINT com um servidor HTTP'
+      );
+    }
+
+    render(data);
+
+  } catch (err) {
+    el('loading').style.display = 'none';
+    el('error-box').style.display = 'flex';
+    el('error-msg').textContent = err.message;
+  } finally {
+    el('btn-refresh').disabled = false;
+  }
+}
+
+// ─── EVENTS ──────────────────────────────────────────────────────────────────
+el('btn-refresh').addEventListener('click', loadData);
+el('btn-retry')  .addEventListener('click', loadData);
+
+// Auto-load ao abrir
+loadData();
+</script>
+</body>
+</html>

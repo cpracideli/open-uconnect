@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uconnect Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --accent:      #e63312;
+      --accent-glow: rgba(230, 51, 18, 0.30);
+      --ok:          #30d158;
+      --warn:        #ff9f0a;
+      --danger:      #ff453a;
+      --blue:        #0a84ff;
+      --purple:      #bf5af2;
+      --text:        #f5f5f7;
+      --muted:       rgba(235,235,245,0.52);
+      --muted2:      rgba(235,235,245,0.28);
+      --border:      rgba(255,255,255,0.10);
+      --border-hi:   rgba(255,255,255,0.18);
+      --radius:      20px;
+      --radius-sm:   13px;
+      --radius-pill: 9999px;
+      --font:        'Inter', -apple-system, 'SF Pro Display', system-ui, sans-serif;
+      /* glass recipe */
+      --glass-bg:    rgba(255,255,255,0.07);
+      --glass-blur:  blur(28px) saturate(2);
+      --glass-blur-sm: blur(16px) saturate(1.8);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    /* ── Animated mesh background ── */
+    body {
+      background-color: #080010;
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Fixed orb layer behind everything */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 70% 55% at 15% 10%,  rgba(230,51,18,0.32)  0%, transparent 65%),
+        radial-gradient(ellipse 55% 50% at 85% 20%,  rgba(99,0,210,0.22)   0%, transparent 60%),
+        radial-gradient(ellipse 60% 45% at 50% 90%,  rgba(10,132,255,0.18) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 35% at 10% 80%,  rgba(191,90,242,0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 90% 75%,  rgba(48,209,88,0.10)  0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Subtle noise texture overlay for depth */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* All content must sit above the orb layer */
+    header, #loading, #error-box, main { position: relative; z-index: 1; }
+
+    /* ── Header — frosted glass pill bar ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: rgba(8,0,16,0.55);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid var(--border);
+      /* top specular edge */
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+      padding: 12px 28px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .header-icon {
+      width: 34px; height: 34px;
+      background: var(--accent);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.15) inset, 0 4px 16px var(--accent-glow);
+    }
+    header h1  { font-size: 1rem; font-weight: 600; letter-spacing: -0.3px; }
+    header p   { font-size: .72rem; color: var(--muted); margin-top: 1px; }
+    #last-update { margin-left: auto; font-size: .7rem; color: var(--muted); text-align: right; line-height: 1.5; }
+
+    /* ── Loading / Error ── */
+    #loading, #error-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 16px;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 2.5px solid rgba(255,255,255,.10);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading p { font-size: .85rem; color: var(--muted); }
+    #error-box { color: var(--danger); }
+    #error-box pre {
+      background: rgba(255,69,58,.08);
+      border: 1px solid rgba(255,69,58,.20);
+      padding: 16px; border-radius: var(--radius-sm);
+      font-size: .8rem; max-width: 560px; overflow: auto;
+    }
+
+    /* ── Main grid ── */
+    main { max-width: 1060px; margin: 0 auto; padding: 24px 20px 72px; display: none; }
+
+    /* ── Glass mixin (applied via class) ── */
+    .glass {
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-hi);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.14),   /* top specular */
+        inset 0 -1px 0 rgba(0,0,0,0.20),         /* bottom shadow */
+        0 8px 32px rgba(0,0,0,0.35);             /* outer depth */
+    }
+    .glass-sm {
+      background: rgba(255,255,255,0.05);
+      -webkit-backdrop-filter: var(--glass-blur-sm);
+      backdrop-filter: var(--glass-blur-sm);
+      border: 1px solid var(--border);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 4px 16px rgba(0,0,0,0.25);
+    }
+
+    /* ── Vehicle hero ── */
+    .vehicle-hero {
+      background: rgba(255,255,255,0.06);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-hi);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.16),
+        inset 0 -1px 0 rgba(0,0,0,0.20),
+        0 12px 48px rgba(0,0,0,0.45);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+      margin-bottom: 24px;
+      min-height: 210px;
+      position: relative;
+    }
+    .vehicle-hero-img-wrap {
+      flex: 1 1 58%;
+      position: relative;
+      overflow: hidden;
+      min-height: 180px;
+      background:
+        radial-gradient(ellipse 90% 70% at 50% 85%, rgba(230,51,18,.10) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,255,255,.02) 0%, transparent 70%);
+    }
+    .vehicle-hero-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      object-position: center 85%;
+      padding: 24px 16px 0;
+      filter: drop-shadow(0 16px 40px rgba(0,0,0,.80));
+      display: block;
+    }
+    /* reflection under car */
+    .vehicle-hero-img-wrap::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 5%; right: 5%; height: 30px;
+      background: radial-gradient(ellipse at center, rgba(255,255,255,.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .vehicle-hero-info {
+      flex: 0 0 auto;
+      width: 265px;
+      padding: 28px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-left: 1px solid var(--border);
+    }
+    .vehicle-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+    }
+    .vehicle-sub  { color: var(--muted); font-size: .8rem; margin-top: 8px; line-height: 1.65; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 11px;
+      border-radius: var(--radius-pill);
+      font-size: .68rem;
+      font-weight: 500;
+      letter-spacing: .1px;
+      background: rgba(48,209,88,.10);
+      color: var(--ok);
+      border: 1px solid rgba(48,209,88,.20);
+      margin-top: 14px;
+      width: fit-content;
+    }
+    @media (max-width: 640px) {
+      .vehicle-hero { flex-direction: column; }
+      .vehicle-hero-info { width: 100%; border-left: none; border-top: 1px solid var(--border); padding: 18px 20px; }
+    }
+
+    /* ── Grid cards ── */
+    .grid { display: grid; gap: 14px; }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); }
+
+    /* ── Glass card ── */
+    .card {
+      background: rgba(255,255,255,0.07);
+      -webkit-backdrop-filter: var(--glass-blur-sm);
+      backdrop-filter: var(--glass-blur-sm);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      /* layered border: bright top, dark bottom */
+      border: 1px solid transparent;
+      background-clip: padding-box;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.15),
+        inset 0 -1px 0 rgba(0,0,0,0.18),
+        inset 1px 0 0 rgba(255,255,255,0.07),
+        inset -1px 0 0 rgba(255,255,255,0.04),
+        0 6px 24px rgba(0,0,0,0.30);
+    }
+    /* diagonal specular sheen */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    .card-title {
+      font-size: .66rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── Stat ── */
+    .stat-value { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.8px; line-height: 1; }
+    .stat-unit  { font-size: .8rem; color: var(--muted); margin-top: 6px; }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+      background: rgba(255,255,255,.06);
+      border-radius: var(--radius-pill);
+      height: 5px;
+      overflow: hidden;
+      margin-top: 14px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.3);
+    }
+    .progress-bar {
+      height: 100%;
+      border-radius: var(--radius-pill);
+      transition: width .8s cubic-bezier(.4,0,.2,1);
+      position: relative;
+    }
+    .bar-ok     { background: linear-gradient(90deg, #28c244, #30d158); box-shadow: 0 0 8px rgba(48,209,88,.4); }
+    .bar-warn   { background: linear-gradient(90deg, #e08800, #ff9f0a); box-shadow: 0 0 8px rgba(255,159,10,.4); }
+    .bar-danger { background: linear-gradient(90deg, #d03030, #ff453a); box-shadow: 0 0 8px rgba(255,69,58,.4); }
+
+    /* ── Tyre grid ── */
+    .tyre-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+    .tyre-item {
+      background: rgba(255,255,255,.05);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius-sm);
+      padding: 13px 8px;
+      text-align: center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 2px 8px rgba(0,0,0,.2);
+      border: 1px solid rgba(255,255,255,.08);
+      transition: box-shadow .2s;
+    }
+    .tyre-item.warn {
+      border-color: rgba(255,69,58,.35);
+      background: rgba(255,69,58,.08);
+      box-shadow: inset 0 1px 0 rgba(255,100,80,.15), 0 2px 8px rgba(0,0,0,.2), 0 0 12px rgba(255,69,58,.15);
+    }
+    .tyre-label  { font-size: .65rem; color: var(--muted); font-weight: 500; letter-spacing: .4px; }
+    .tyre-value  { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.4px; margin: 5px 0 2px; }
+    .tyre-status { font-size: .61rem; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+    .status-ok   { color: var(--ok); }
+    .status-warn { color: var(--danger); }
+
+    /* ── Battery ── */
+    .battery-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .battery-body {
+      flex: 1;
+      height: 24px;
+      background: rgba(255,255,255,.07);
+      border-radius: 6px;
+      border: 1.5px solid rgba(255,255,255,.15);
+      position: relative;
+      overflow: visible;
+    }
+    .battery-body::after {
+      content: '';
+      position: absolute;
+      right: -7px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 12px;
+      background: rgba(255,255,255,.2);
+      border-radius: 0 3px 3px 0;
+    }
+    .battery-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--ok);
+    }
+    .battery-text {
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    /* ── Trips ── */
+    .trip-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .trip-row:last-child { border-bottom: none; }
+    .trip-name { font-weight: 600; font-size: .9rem; letter-spacing: -0.1px; }
+    .trip-dist { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.2px; color: var(--text); }
+    .trip-eff  { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Info table ── */
+    .info-table { width: 100%; border-collapse: collapse; }
+    .info-table tr { border-bottom: 1px solid var(--border); }
+    .info-table tr:last-child { border-bottom: none; }
+    .info-table td { padding: 10px 4px; font-size: .86rem; }
+    .info-table td:first-child { color: var(--muted); width: 45%; }
+    .info-table td:last-child  { font-weight: 500; }
+
+    /* ── Services ── */
+    .services-wrap { display: flex; flex-wrap: wrap; gap: 7px; }
+    .svc-chip {
+      font-size: .68rem;
+      font-weight: 500;
+      padding: 4px 11px;
+      border-radius: var(--radius-pill);
+      border: 1px solid;
+      letter-spacing: .15px;
+    }
+    .svc-on  { color: var(--ok);   border-color: rgba(48,209,88,.22);  background: rgba(48,209,88,.07); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
+    .svc-off { color: var(--muted2); border-color: rgba(255,255,255,.06); background: rgba(255,255,255,.02); }
+
+    /* ── Refresh button ── */
+    .refresh-wrap { text-align: center; margin-top: 40px; }
+    #btn-refresh {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 13px 38px;
+      border-radius: var(--radius-pill);
+      font-size: .9rem;
+      font-weight: 500;
+      font-family: var(--font);
+      letter-spacing: -0.1px;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 6px 24px var(--accent-glow);
+    }
+    #btn-refresh:hover:not(:disabled) { opacity: .88; transform: scale(.98); }
+    #btn-refresh:active:not(:disabled) { transform: scale(.94); }
+    #btn-refresh:disabled { opacity: .30; cursor: default; }
+    #refresh-status { font-size:.73rem; color:var(--muted); margin-top:10px; min-height:1em; }
+
+    /* ── Section header ── */
+    .section-title {
+      font-size: .65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.1px;
+      color: rgba(235,235,245,0.40);
+      margin: 30px 0 10px;
+      padding-left: 4px;
+    }
+
+    /* ── Manutenção ── */
+    .maint-empty {
+      text-align: center;
+      padding: 28px 16px;
+      color: var(--muted);
+    }
+    .maint-empty-icon { font-size: 2rem; margin-bottom: 8px; opacity: .7; }
+    .maint-empty p    { font-size: .85rem; margin-top: 4px; }
+
+    .maint-record {
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .maint-record:last-child { border-bottom: none; }
+    .maint-icon {
+      width: 36px; height: 36px;
+      background: rgba(230,51,18,.10);
+      border: 1px solid rgba(230,51,18,.18);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .maint-info  { flex: 1; }
+    .maint-desc  { font-weight: 600; font-size: .88rem; letter-spacing: -0.1px; }
+    .maint-meta  { font-size: .75rem; color: var(--muted); margin-top: 3px; }
+    .maint-km    { font-size: .85rem; font-weight: 600; color: var(--muted); white-space: nowrap; }
+
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 7px;
+    }
+    .cat-item {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-size: .75rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cat-item::before { content: '🔧'; font-size: .8rem; }
+
+    /* ── Controle Remoto ── */
+    .remote-panel {
+      background: rgba(255,255,255,0.07);
+      -webkit-backdrop-filter: var(--glass-blur-sm);
+      backdrop-filter: var(--glass-blur-sm);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.15),
+        inset 0 -1px 0 rgba(0,0,0,0.18),
+        0 6px 24px rgba(0,0,0,0.30);
+    }
+    .remote-panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    .remote-panel-title {
+      font-size: .66rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .remote-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .remote-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 17px;
+      border-radius: var(--radius-pill);
+      background: rgba(255,255,255,.07);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: .83rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .16s ease;
+      letter-spacing: -0.1px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 2px 8px rgba(0,0,0,.20);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .remote-btn:hover:not(:disabled) {
+      background: rgba(255,255,255,.13);
+      border-color: rgba(255,255,255,.22);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 4px 14px rgba(0,0,0,.25);
+    }
+    .remote-btn:active:not(:disabled) { transform: scale(.95); opacity: .85; }
+    .remote-btn:disabled { opacity: .25; cursor: default; }
+    /* subtle color cues preserved but toned down */
+    .remote-btn.btn-on  { border-color: rgba(48,209,88,.35); color: var(--ok); }
+    .remote-btn.btn-off { border-color: rgba(230,51,18,.35); color: var(--accent); }
+    .remote-btn.btn-unlock { border-color: rgba(255,159,10,.35); color: var(--warn); }
+    .remote-btn.btn-lock   { border-color: rgba(10,132,255,.35); color: var(--blue); }
+    .remote-btn.btn-horn        { border-color: rgba(191,90,242,.35); color: #bf5af2; }
+    .remote-btn.btn-lights      { border-color: rgba(255,214,10,.35); color: #ffd60a; }
+    .remote-btn.btn-trunk-unlock{ border-color: rgba(48,209,88,.25);  color: var(--ok); }
+    .remote-btn.btn-trunk-lock  { border-color: rgba(48,209,88,.2);   color: #30d158aa; }
+    .remote-btn.btn-precond-on  { border-color: rgba(10,132,255,.3);  color: var(--blue); }
+    .remote-btn.btn-precond-off { border-color: rgba(10,132,255,.2);  color: #0a84ffaa; }
+    .remote-btn.btn-gps         { border-color: rgba(191,90,242,.3);  color: #bf5af2; }
+    .refresh-mini {
+      margin-top: .9rem; padding: .35rem .9rem; font-size: .76rem;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--muted); border-radius: var(--radius-pill);
+      cursor: pointer; transition: all .18s; font-family: var(--font);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .refresh-mini:hover { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.22); color: var(--text); }
+    .door-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .88rem;
+    }
+    .door-row:last-child { border-bottom: none; }
+    .door-icon { font-size: 1rem; margin-right: .35rem; }
+    .status-locked   { color: var(--ok); }
+    .status-unlocked { color: var(--danger); }
+    .status-closed   { color: var(--ok); }
+    .status-open     { color: var(--danger); }
+    .map-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: .75rem; padding: .4rem .9rem;
+      background: rgba(10,132,255,.10);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      border: 1px solid rgba(10,132,255,.28);
+      border-radius: var(--radius-pill); color: var(--blue);
+      text-decoration: none; font-size: .8rem; transition: all .18s;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .map-link:hover { background: rgba(10,132,255,.18); border-color: rgba(10,132,255,.45); }
+    .trip-row {
+      display: flex; justify-content: space-between; padding: .38rem 0;
+      border-bottom: 1px solid var(--border); font-size: .86rem;
+    }
+    .trip-row:last-child { border-bottom: none; }
+    .remote-btn.loading::before {
+      content: '';
+      width: 13px; height: 13px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: inline-block;
+    }
+    .pin-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .pin-row label { font-size: .78rem; color: var(--muted); white-space: nowrap; }
+    .pin-input {
+      background: rgba(255,255,255,.07);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 8px 14px;
+      font-size: .92rem;
+      font-family: var(--font);
+      width: 104px;
+      letter-spacing: 5px;
+      text-align: center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 2px 6px rgba(0,0,0,.20);
+    }
+    .pin-input:focus { outline: none; border-color: rgba(230,51,18,.50); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 0 0 3px rgba(230,51,18,.15); }
+    .cmd-status {
+      margin-top: 12px;
+      font-size: .8rem;
+      color: var(--muted);
+      min-height: 1.2em;
+    }
+    .cmd-status.ok   { color: var(--ok); }
+    .cmd-status.fail { color: var(--danger); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-icon">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M3 6h14M3 10h14M3 14h14" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="6.5" cy="17" r="2" fill="#fff" opacity=".9"/>
+      <circle cx="13.5" cy="17" r="2" fill="#fff" opacity=".9"/>
+    </svg>
+  </div>
+  <div>
+    <h1>Uconnect</h1>
+    <p>Jeep Compass — tempo real</p>
+  </div>
+  <div id="last-update">—</div>
+</header>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p>Buscando dados do veículo…</p>
+</div>
+
+<div id="error-box" style="display:none">
+  <span style="font-size:2rem">⚠️</span>
+  <strong style="font-size:1rem;font-weight:600;letter-spacing:-0.2px">Erro ao carregar dados</strong>
+  <pre id="error-msg"></pre>
+  <button id="btn-retry" style="background:var(--accent);color:#fff;border:none;padding:10px 28px;border-radius:var(--radius-pill);cursor:pointer;font-size:.88rem;font-weight:500;font-family:var(--font);box-shadow:0 4px 16px var(--accent-glow)">Tentar novamente</button>
+</div>
+
+<main id="main">
+
+  <!-- Vehicle hero -->
+  <div class="vehicle-hero" id="hero"></div>
+
+  <!-- Controle Remoto -->
+  <p class="section-title">🎮 Controle Remoto</p>
+  <div class="remote-panel" id="remote-panel">
+    <div class="remote-panel-title">Comandos do Veículo</div>
+    <div class="pin-row">
+      <label for="pin-input">🔒 PIN:</label>
+      <input type="password" id="pin-input" class="pin-input" placeholder="••••" maxlength="6" inputmode="numeric" />
+      <span style="font-size:.75rem;color:var(--muted)">(mesmo PIN do app Uconnect)</span>
+    </div>
+    <div class="remote-buttons">
+      <button class="remote-btn btn-on"  id="btn-engine-on" >🔑 Ligar Motor</button>
+      <button class="remote-btn btn-off" id="btn-engine-off">⏹ Desligar Motor</button>
+      <button class="remote-btn btn-unlock" id="btn-doors-unlock">🔓 Destrancar</button>
+      <button class="remote-btn btn-lock"   id="btn-doors-lock"  >🔐 Trancar</button>
+      <button class="remote-btn btn-horn"   id="btn-horn"        >📯 Buzina + Luzes</button>
+      <button class="remote-btn btn-lights" id="btn-lights"      >💡 Só Luzes</button>
+      <button class="remote-btn btn-trunk-unlock" id="btn-trunk-unlock">📦 Abrir Porta-Malas</button>
+      <button class="remote-btn btn-trunk-lock"   id="btn-trunk-lock"  >📦🔐 Fechar Porta-Malas</button>
+      <button class="remote-btn btn-precond-on"   id="btn-precond-on"  >❄️ Pré-climatizar</button>
+      <button class="remote-btn btn-precond-off"  id="btn-precond-off" >❄️ Parar Clim.</button>
+      <button class="remote-btn btn-gps" id="btn-gps-update">&#x1F4CD; Atualizar GPS</button>
+    </div>
+    <div class="cmd-status" id="cmd-status">⬆ Informe seu PIN e clique em um comando</div>
+  </div>
+
+  <!-- Key metrics -->
+  <p class="section-title">📊 Status Atual</p>
+  <div class="grid grid-4" id="metrics"></div>
+
+  <!-- Tyres + Trips -->
+  <p class="section-title">🔧 Detalhes</p>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">🛞 Pressão dos Pneus</div>
+      <div class="tyre-grid" id="tyres"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🗺️ Viagens</div>
+      <div id="trips"></div>
+    </div>
+  </div>
+  <!-- Portas / Janelas / Status Remoto -->
+  <p class="section-title">🚪 Portas & Janelas</p>
+  <div class="grid grid-2">
+    <div class="card" id="doors-card">
+      <div class="card-title">🚪 Status das Portas</div>
+      <div id="doors-status"><span class="muted">Clique em “Atualizar” para carregar</span></div>
+      <button class="refresh-mini" id="btn-refresh-doors" onclick="loadDoorsStatus()">🔄 Atualizar</button>
+    </div>
+    <div class="card" id="location-card">
+      <div class="card-title">📍 Localização GPS</div>
+      <div id="location-status"><span class="muted">Clique em “Atualizar” para carregar</span></div>
+      <button class="refresh-mini" id="btn-refresh-location" onclick="loadLocationStatus()">🔄 Atualizar</button>
+    </div>
+  </div>
+
+  <!-- Última Viagem -->
+  <p class="section-title">🏎️ Última Viagem</p>
+  <div class="grid grid-2">
+    <div class="card" id="lasttrip-card">
+      <div class="card-title">🗓 Dados da Viagem</div>
+      <div id="lasttrip-data"><span class="muted">Clique em “Atualizar” para carregar</span></div>
+      <button class="refresh-mini" onclick="loadLastTrip()">🔄 Atualizar</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Eco Score</div>
+      <div id="ecoscore-data"><span class="muted">Disponível após atualizar viagem</span></div>
+    </div>
+  </div>
+
+  <!-- Manutenção -->
+  <p class="section-title">📖 Histórico de Manutenção</p>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">📅 Registros de Serviço</div>
+      <div id="maint-history"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📂 Categorias Disponíveis</div>
+      <div class="cat-grid" id="maint-categories"></div>
+    </div>
+  </div>
+  <!-- Vehicle info + Services -->
+  <p class="section-title">🚗 Informações do Veículo</p>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">🪪 Identificação</div>
+      <table class="info-table" id="veh-info"></table>
+    </div>
+    <div class="card">
+      <div class="card-title">⚙️ Serviços Ativos</div>
+      <div class="services-wrap" id="services"></div>
+    </div>
+  </div>
+
+  <div class="refresh-wrap">
+    <button id="btn-refresh">🔄 Atualizar dados</button>
+    <div id="refresh-status"></div>
+  </div>
+
+</main>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+// O script Node.js gera o JSON — aqui lemos o arquivo mais recente via fetch
+// OU, se abrir localmente como file://, usamos os dados embutidos diretamente.
+// Para uso real com servidor (ex: npx serve .), o endpoint /api/data é preferido.
+
+// API sempre aponta para a mesma origin (funciona local e em produção no Railway)
+const API_ENDPOINT = `${location.protocol}//${location.host}/api/data`;
+const JSON_FILE = null; // ex: 'uconnect-result-1782264487381.json'
+
+// ─── Auth header para as chamadas de API ─────────────────────────────────────
+// Em produção, preenchido pelo servidor via meta tag; localmente sem auth.
+const _authMeta = document.querySelector('meta[name="api-auth"]');
+const API_AUTH  = _authMeta ? _authMeta.content : null;
+function apiHeaders(extra) {
+    const h = { 'Content-Type': 'application/json', ...extra };
+    if (API_AUTH) h['Authorization'] = API_AUTH;
+    return h;
+}
+
+// ─── DADOS EMBUTIDOS (atualizados pelo script Node.js) ───────────────────────
+// Execute: node uconnect-api.js && node embed-data.js   (veja instrução abaixo)
+// Ou substitua manualmente o conteúdo de EMBEDDED_DATA com o JSON mais recente.
+let EMBEDDED_DATA = null;
+try {
+  EMBEDDED_DATA = JSON.parse(`__EMBEDDED_JSON__`);
+} catch(e) {
+  EMBEDDED_DATA = null;
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function el(id) { return document.getElementById(id); }
+
+function barClass(pct) {
+  if (pct >= 50) return 'bar-ok';
+  if (pct >= 25) return 'bar-warn';
+  return 'bar-danger';
+}
+
+function colorByPct(pct) {
+  if (pct >= 50) return 'var(--ok)';
+  if (pct >= 25) return 'var(--warn)';
+  return 'var(--danger)';
+}
+
+function tyrePos(code) {
+  const map = { FL: 'Dianteiro Esq.', FR: 'Dianteiro Dir.', RL: 'Traseiro Esq.', RR: 'Traseiro Dir.' };
+  return map[code] || code;
+}
+
+function fuelColor(pct) {
+  if (pct >= 40) return 'bar-ok';
+  if (pct >= 20) return 'bar-warn';
+  return 'bar-danger';
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function render(data) {
+  const vehicle = data.vehicles[0];
+  const vin     = vehicle.vin;
+  _currentVin   = vin;   // expõe para os controles remotos
+  const info    = data.status[vin].vehicleInfo;
+  const ts      = new Date(data.timestamp);
+
+  // Last update
+  el('last-update').innerHTML = `Atualizado em<br><strong>${ts.toLocaleString('pt-BR')}</strong>`;
+
+  // ── Hero ──
+  el('hero').innerHTML = `
+    <div class="vehicle-hero-img-wrap">
+      <img src="/public/car.png" alt="${vehicle.make} ${vehicle.modelDescription} ${vehicle.year}" />
+    </div>
+    <div class="vehicle-hero-info">
+      <div class="vehicle-name">${vehicle.make} ${vehicle.modelDescription}</div>
+      <div class="vehicle-sub">
+        ${vehicle.year} &nbsp;·&nbsp; ${vehicle.fuelType === 'G' ? 'Gasolina' : vehicle.fuelType}<br>
+        <span style="font-family:monospace;font-size:.78rem;color:var(--muted)">${vin}</span><br>
+        <span style="color:var(--text);font-size:.82rem">${vehicle.color}</span>
+      </div>
+      <span class="badge">✓ ${vehicle.regStatus.replace(/_/g,' ')}</span>
+    </div>
+  `;
+
+  // ── Métricas ──
+  const fuelPct  = info.fuel.fuelAmountLevel;
+  const odo      = parseInt(info.odometer.odometer.value).toLocaleString('pt-BR');
+  const dte      = info.fuel.distanceToEmpty.value;
+  const batV     = info.batteryInfo.batteryVoltage.value;
+  const dts      = parseFloat(info.distanceToService?.distanceToService?.value || 0).toLocaleString('pt-BR');
+
+  el('metrics').innerHTML = `
+    <!-- Combustível -->
+    <div class="card">
+      <div class="card-title">⛽ Combustível</div>
+      <div class="stat-value" style="color:${colorByPct(fuelPct)}">${fuelPct}<span style="font-size:1rem">%</span></div>
+      <div class="stat-unit">${info.fuel.fuelAmount.value} litros restantes</div>
+      <div class="progress-wrap" style="margin-top:14px">
+        <div class="progress-bar ${fuelColor(fuelPct)}" style="width:${fuelPct}%"></div>
+      </div>
+    </div>
+
+    <!-- Autonomia -->
+    <div class="card">
+      <div class="card-title">🛣️ Autonomia Restante</div>
+      <div class="stat-value">${parseInt(dte).toLocaleString('pt-BR')}</div>
+      <div class="stat-unit">km até o tanque vazio</div>
+    </div>
+
+    <!-- Odômetro -->
+    <div class="card">
+      <div class="card-title">📍 Odômetro</div>
+      <div class="stat-value">${odo}</div>
+      <div class="stat-unit">km rodados no total</div>
+    </div>
+
+    <!-- Próxima revisão -->
+    <div class="card">
+      <div class="card-title">🔧 Próxima Revisão</div>
+      <div class="stat-value" style="font-size:1.7rem">${dts}</div>
+      <div class="stat-unit">km restantes para revisão</div>
+      <div style="margin-top:12px;display:flex;align-items:center;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="var(--muted)" stroke-width="1.5"/><path d="M8 5v3.5l2 1.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span style="font-size:.78rem;color:var(--muted)">Bateria: ${batV} V</span>
+      </div>
+    </div>
+  `;
+
+  // ── Pneus ──
+  const tyreOrder = ['FL','FR','RL','RR'];
+  el('tyres').innerHTML = tyreOrder.map(pos => {
+    const t = info.tyrePressure.find(x => x.type === pos);
+    if (!t) return '';
+    const psi  = (parseFloat(t.pressure.value) / 6.895).toFixed(1);
+    const kpa  = parseFloat(t.pressure.value).toFixed(0);
+    const warn = t.warning;
+    return `
+      <div class="tyre-item ${warn ? 'warn' : ''}">
+        <div class="tyre-label">${tyrePos(pos)}</div>
+        <div class="tyre-value">${psi}</div>
+        <div style="font-size:.65rem;color:var(--muted)">psi &nbsp;(${kpa} kPa)</div>
+        <div class="tyre-status ${warn ? 'status-warn' : 'status-ok'}">${warn ? '⚠ '+t.status.replace(/_/g,' ') : '✓ Normal'}</div>
+      </div>
+    `;
+  }).join('');
+
+  // ── Viagens ──
+  el('trips').innerHTML = info.tripsInfo.trips.map(t => `
+    <div class="trip-row">
+      <div>
+        <div class="trip-name">${t.name}</div>
+        <div class="trip-eff">Eficiência: ${t.averageEnergyUsed.value} ${t.averageEnergyUsed.unit}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="trip-dist">${parseInt(t.totalDistance.value).toLocaleString('pt-BR')} km</div>
+      </div>
+    </div>
+  `).join('');
+
+  // ── Info do veículo ──
+  const rows = [
+    ['Marca',       `${vehicle.make} / ${vehicle.subMake}`],
+    ['Modelo',      `${vehicle.modelDescription} (${vehicle.model})`],
+    ['Ano',         vehicle.year],
+    ['Combustível', vehicle.fuelType === 'G' ? 'Gasolina' : vehicle.fuelType],
+    ['Mercado',     vehicle.market],
+    ['VIN',         `<span style="font-family:monospace;font-size:.82rem">${vin}</span>`],
+    ['Plataforma',  vehicle.sdp],
+    ['Empresa',     vehicle.company],
+  ];
+  el('veh-info').innerHTML = rows.map(([k,v]) => `
+    <tr><td>${k}</td><td>${v}</td></tr>
+  `).join('');
+
+  // ── Serviços ──
+  const enabledSvcs = vehicle.services
+    .filter(s => s.vehicleCapable && s.serviceEnabled)
+    .map(s => s.service);
+  const disabledSvcs = vehicle.services
+    .filter(s => s.vehicleCapable && !s.serviceEnabled)
+    .map(s => s.service);
+
+  el('services').innerHTML =
+    enabledSvcs.map(s => `<span class="svc-chip svc-on">✓ ${s}</span>`).join('') +
+    disabledSvcs.map(s => `<span class="svc-chip svc-off">${s}</span>`).join('');
+
+  // ── Manutenção ──
+  const maint = data.maintenance?.[vin];
+
+  // Registros
+  const history = maint?.serviceHistory || [];
+  const catMap  = {};
+  (maint?.nonfcaServiceCategoryList || []).forEach(c => { catMap[c.id] = c.description; });
+
+  const serviceIcons = {
+    'Oil Change':           '🛢',
+    'Brakes':               '🔴',
+    'Tire Rotation':        '🔄',
+    'Battery':              '🔋',
+    'Filters/Bulbs':        '💡',
+    'Air Conditioning':     '❄️',
+    'Cooling System':       '🌡️',
+    'Fuel System':          '⛽',
+    'Transmission':         '⚙️',
+    'Shocks/Struts':        '🚗',
+    'Suspension/Alignment': '🔧',
+    'Wheel Balance':        '⭕',
+    'Wiper Blades':         '🌧️',
+    'Other':                '📦',
+  };
+
+  if (history.length === 0) {
+    el('maint-history').innerHTML = `
+      <div class="maint-empty">
+        <div class="maint-empty-icon">📚</div>
+        <strong>Nenhum registro encontrado</strong>
+        <p>O histórico de manutenção da FCA está vazio.<br>Registros de oficinas externas podem ser adicionados pelo app Uconnect.</p>
+      </div>
+    `;
+  } else {
+    el('maint-history').innerHTML = history.map(r => {
+      const catName = catMap[r.serviceCategory] || r.serviceCategory || 'Serviço';
+      const icon    = serviceIcons[catName] || '🔧';
+      const date    = r.serviceDate ? new Date(r.serviceDate).toLocaleDateString('pt-BR') : '—';
+      const km      = r.odometer    ? parseInt(r.odometer).toLocaleString('pt-BR') + ' km' : '';
+      const dealer  = r.dealerName  ? `<br>${r.dealerName}` : '';
+      return `
+        <div class="maint-record">
+          <div class="maint-icon">${icon}</div>
+          <div class="maint-info">
+            <div class="maint-desc">${catName}</div>
+            <div class="maint-meta">${date}${dealer}</div>
+            ${r.notes ? `<div class="maint-meta" style="color:var(--text)">${r.notes}</div>` : ''}
+          </div>
+          ${km ? `<div class="maint-km">${km}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Categorias disponíveis
+  el('maint-categories').innerHTML = (maint?.nonfcaServiceCategoryList || []).map(c =>
+    `<div class="cat-item">${c.description}</div>`
+  ).join('');
+
+  // Mostrar
+  el('loading').style.display = 'none';
+  el('error-box').style.display = 'none';
+  el('main').style.display = 'block';
+}
+
+// ─── LOAD DATA ───────────────────────────────────────────────────────────────
+let isFirstLoad = true;
+
+async function loadData() {
+  const isRefresh = !isFirstLoad;
+
+  // Na primeira carga mostra o spinner de tela cheia
+  // Nos refreshes mantém o dashboard visível e só desabilita o botão
+  if (!isRefresh) {
+    el('loading').style.display = 'flex';
+    el('error-box').style.display = 'none';
+    el('main').style.display = 'none';
+  }
+
+  el('btn-refresh').disabled = true;
+  el('btn-refresh').textContent = '⏳ Buscando dados...';
+  el('refresh-status').textContent = '';
+
+  try {
+    let data;
+
+    if (API_ENDPOINT) {
+      const res = await fetch(API_ENDPOINT, { headers: apiHeaders() });
+      if (!res.ok) throw new Error(`Erro na API: HTTP ${res.status}`);
+      data = await res.json();
+      if (data.error) throw new Error(data.error + (data.detail ? '\n' + JSON.stringify(data.detail) : ''));
+
+    } else if (JSON_FILE) {
+      const res = await fetch(JSON_FILE);
+      if (!res.ok) throw new Error(`Arquivo "${JSON_FILE}" não encontrado.`);
+      data = await res.json();
+
+    } else if (EMBEDDED_DATA) {
+      data = EMBEDDED_DATA;
+
+    } else {
+      throw new Error(
+        'Nenhuma fonte de dados configurada.\n\n' +
+        'Execute: node server.js\ne abra http://localhost:3000'
+      );
+    }
+
+    render(data);
+    isFirstLoad = false;
+    el('refresh-status').textContent = `✓ Atualizado às ${new Date().toLocaleTimeString('pt-BR')}`;
+
+  } catch (err) {
+    if (!isRefresh) {
+      el('loading').style.display = 'none';
+      el('error-box').style.display = 'flex';
+      el('error-msg').textContent = err.message;
+    } else {
+      el('refresh-status').textContent = `⚠ Erro: ${err.message.split('\n')[0]}`;
+      el('refresh-status').style.color = 'var(--danger)';
+    }
+  } finally {
+    el('btn-refresh').disabled = false;
+    el('btn-refresh').textContent = '🔄 Atualizar dados';
+  }
+}
+
+// ─── CONTROLE REMOTO ─────────────────────────────────────────────────────────
+
+// VIN do veículo principal (preenchido após render)
+let _currentVin = null;
+
+// Mapeamento botão → comando
+const REMOTE_COMMANDS = [
+  { id: 'btn-engine-on',    command: 'REON',  apiVersion: 'v1', cmdUrl: 'remote', label: '🔑 Ligar Motor' },
+  { id: 'btn-engine-off',   command: 'REOFF', apiVersion: 'v1', cmdUrl: 'remote', label: '⏹ Desligar Motor' },
+  { id: 'btn-lights',       command: 'ROLIGHTS', apiVersion: 'v1', cmdUrl: 'remote', label: '💡 Só Luzes' },
+  { id: 'btn-trunk-unlock', command: 'ROTRUNKUNLOCK', apiVersion: 'v2', cmdUrl: 'remote', label: '📦 Abrir Porta-Malas' },
+  { id: 'btn-trunk-lock',   command: 'ROTRUNKLOCK',   apiVersion: 'v2', cmdUrl: 'remote', label: '📦🔐 Fechar Porta-Malas' },
+  { id: 'btn-precond-on',   command: 'ROPRECOND',     apiVersion: 'v1', cmdUrl: 'remote', label: '❄️ Pré-climatizar' },
+  { id: 'btn-precond-off',  command: 'ROPRECOND_OFF', apiVersion: 'v1', cmdUrl: 'remote', label: '❄️ Parar Clim.' },
+  { id: 'btn-doors-unlock', command: 'RDU',   apiVersion: 'v1', cmdUrl: 'remote', label: '🔓 Destrancar' },
+  { id: 'btn-doors-lock',   command: 'RDL',   apiVersion: 'v1', cmdUrl: 'remote', label: '🔐 Trancar' },
+  { id: 'btn-horn',         command: 'HBLF',  apiVersion: 'v1', cmdUrl: 'remote', label: '📯 Buzina + Luzes' },
+];
+
+// O btn-gps-update é tratado separadamente (não é um comando padrão)
+document.addEventListener('DOMContentLoaded', () => {
+  const gpsBtn = document.getElementById('btn-gps-update');
+  if (gpsBtn) gpsBtn.addEventListener('click', handleGpsUpdate);
+});
+
+// ─── GPS Update ───────────────────────────────────────────────────────────────
+async function handleGpsUpdate() {
+  const pin = document.getElementById('pin-input').value.trim();
+  if (!pin) { setCmdStatus('⚠ Informe o PIN primeiro', 'fail'); return; }
+  if (!_currentVin) { setCmdStatus('⚠ Carregue os dados primeiro', 'fail'); return; }
+  const btn = document.getElementById('btn-gps-update');
+  btn.disabled = true;
+  setCmdStatus('📡 Solicitando atualização de GPS...');
+  try {
+    const res = await fetch('/api/location/update', {
+      method: 'POST',
+      headers: apiHeaders(),
+      body: JSON.stringify({ vin: _currentVin, pin }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    setCmdStatus('📡 GPS atualizado! Recarregando localização em 10s...', 'ok');
+    setTimeout(() => loadLocationStatus(), 10000);
+  } catch (err) {
+    setCmdStatus(`❌ ${err.message}`, 'fail');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ─── Portas & Janelas ─────────────────────────────────────────────────────────
+async function loadDoorsStatus() {
+  if (!_currentVin) return;
+  const el = document.getElementById('doors-status');
+  el.innerHTML = '<span class="muted">Carregando...</span>';
+  try {
+    const res  = await fetch(`/api/doors?vin=${encodeURIComponent(_currentVin)}`, { headers: apiHeaders() });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    const doors   = data.doors   || {};
+    const windows = data.windows || {};
+    const engine  = data.engine  || {};
+    const trunk   = data.trunk   || {};
+
+    function statusIcon(val, lockedVal = 'LOCKED') {
+      if (val === undefined || val === null) return '<span class="muted">—</span>';
+      const isLocked = (String(val).toUpperCase() === lockedVal.toUpperCase());
+      return isLocked
+        ? `<span class="status-locked">🔒 ${val}</span>`
+        : `<span class="status-unlocked">🔓 ${val}</span>`;
+    }
+    function closedIcon(val) {
+      if (val === undefined || val === null) return '<span class="muted">—</span>';
+      const isClosed = (String(val).toUpperCase() === 'CLOSED');
+      return isClosed
+        ? `<span class="status-closed">✅ ${val}</span>`
+        : `<span class="status-open">⚠️ ${val}</span>`;
+    }
+
+    const rows = [
+      ['🚗 Motor',          statusIcon(engine.status, 'ON')],
+      ['🪟 Porta-motorista',statusIcon(doors?.driver?.status)],
+      ['🪟 Porta-passageiro',statusIcon(doors?.passenger?.status)],
+      ['🪟 Traseira esq.',  statusIcon(doors?.leftRear?.status)],
+      ['🪟 Traseira dir.',  statusIcon(doors?.rightRear?.status)],
+      ['📦 Porta-malas',    statusIcon(trunk.status)],
+      ['💨 Janela mot.',    closedIcon(windows?.driver?.status)],
+      ['💨 Janela pass.',   closedIcon(windows?.passenger?.status)],
+    ];
+
+    el.innerHTML = rows.map(([label, value]) =>
+      `<div class="door-row"><span><span class="door-icon"></span>${label}</span><span>${value}</span></div>`
+    ).join('');
+
+    // Timestamp
+    if (data.timestamp) {
+      const ts = new Date(data.timestamp).toLocaleString('pt-BR');
+      el.innerHTML += `<div style="margin-top:.6rem;font-size:.75rem;color:var(--muted)">⏱ ${ts}</div>`;
+    }
+  } catch (err) {
+    el.innerHTML = `<span class="muted">Erro: ${err.message}</span>`;
+  }
+}
+
+// ─── Localização GPS ──────────────────────────────────────────────────────────
+async function loadLocationStatus() {
+  if (!_currentVin) return;
+  const el = document.getElementById('location-status');
+  el.innerHTML = '<span class="muted">Carregando...</span>';
+  try {
+    const res  = await fetch(`/api/location?vin=${encodeURIComponent(_currentVin)}`, { headers: apiHeaders() });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    const lat = data.latitude  || data.positionLatitude;
+    const lon = data.longitude || data.positionLongitude;
+    const alt = data.altitude  || data.positionAltitude;
+    const ts  = data.timeStamp ? new Date(data.timeStamp).toLocaleString('pt-BR') : '—';
+    const approx = data.isLocationApprox ? ' (aprox.)' : '';
+
+    if (!lat || !lon) {
+      el.innerHTML = '<span class="muted">Localização não disponível</span>';
+      return;
+    }
+
+    const mapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+    el.innerHTML = `
+      <div class="door-row"><span>📍 Latitude</span><span>${lat.toFixed(6)}</span></div>
+      <div class="door-row"><span>📍 Longitude</span><span>${lon.toFixed(6)}</span></div>
+      ${alt ? `<div class="door-row"><span>⛰️ Altitude</span><span>${alt} m</span></div>` : ''}
+      <div class="door-row"><span>🕐 Atualizado</span><span>${ts}${approx}</span></div>
+      <a class="map-link" href="${mapsUrl}" target="_blank">🗺️ Abrir no Google Maps</a>
+    `;
+  } catch (err) {
+    el.innerHTML = `<span class="muted">Erro: ${err.message}</span>`;
+  }
+}
+
+// ─── Última Viagem ────────────────────────────────────────────────────────────
+async function loadLastTrip() {
+  if (!_currentVin) return;
+  const el    = document.getElementById('lasttrip-data');
+  const elEco = document.getElementById('ecoscore-data');
+  el.innerHTML = '<span class="muted">Carregando...</span>';
+  try {
+    const res  = await fetch(`/api/lasttrip?vin=${encodeURIComponent(_currentVin)}`, { headers: apiHeaders() });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    // A estrutura pode variar — tenta extrair campos comuns
+    const trip = data.trip || data.lastTrip || data;
+    const rows = [];
+
+    function addRow(label, value, unit = '') {
+      if (value !== undefined && value !== null) rows.push([label, `${value}${unit}`]);
+    }
+
+    addRow('📏 Distância',   trip.distance?.value || trip.distanceDriven, ' km');
+    addRow('⏱ Duração',      trip.duration?.value || trip.tripDuration, ' min');
+    addRow('⛽ Consumo',      trip.fuelConsumption?.value || trip.averageFuelConsumption, ' L/100km');
+    addRow('🌿 Eco Score',    trip.ecoScore || trip.globalScore);
+    addRow('🚀 Vel. máx.',   trip.maxSpeed?.value || trip.maxSpeed, ' km/h');
+    addRow('📊 Vel. média',  trip.averageSpeed?.value || trip.averageSpeed, ' km/h');
+    addRow('📅 Data início', trip.startDate || trip.startTime);
+    addRow('📅 Data fim',    trip.endDate   || trip.endTime);
+
+    if (rows.length === 0) {
+      el.innerHTML = `<details><summary class="muted" style="cursor:pointer">Ver dados brutos</summary><pre style="font-size:.7rem;overflow:auto;max-height:200px">${JSON.stringify(data, null, 2)}</pre></details>`;
+    } else {
+      el.innerHTML = rows.map(([l,v]) =>
+        `<div class="trip-row"><span>${l}</span><span>${v}</span></div>`
+      ).join('');
+    }
+
+    // Eco score separado
+    const eco = trip.ecoScore || trip.globalScore;
+    if (eco !== undefined) {
+      const pct = Math.round(eco);
+      const color = pct >= 70 ? '#34d399' : pct >= 40 ? '#fbbf24' : '#f87171';
+      elEco.innerHTML = `
+        <div style="text-align:center;padding:1rem">
+          <div style="font-size:3rem;font-weight:700;color:${color}">${pct}</div>
+          <div style="color:var(--muted);font-size:.85rem">/ 100</div>
+          <div style="margin-top:.5rem;height:8px;background:rgba(255,255,255,.1);border-radius:4px">
+            <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width .5s"></div>
+          </div>
+        </div>`;
+    } else {
+      elEco.innerHTML = '<span class="muted">Eco score não disponível para este veículo</span>';
+    }
+  } catch (err) {
+    el.innerHTML = `<span class="muted">Erro: ${err.message}</span>`;
+    elEco.innerHTML = '';
+  }
+}
+
+function setCmdStatus(msg, cls = '') {
+  const el = document.getElementById('cmd-status');
+  el.textContent = msg;
+  el.className = 'cmd-status ' + cls;
+}
+
+function setRemoteButtonsDisabled(disabled) {
+  REMOTE_COMMANDS.forEach(c => {
+    const btn = document.getElementById(c.id);
+    if (btn) btn.disabled = disabled;
+  });
+}
+
+// Token de cancelamento global — substitui o anterior a cada novo comando
+let _pollCancelToken = null;
+
+async function pollCommandStatus(vin, correlationId) {
+  // Polling robusto: até 5 min (75 × 4s)
+  // A cada tentativa usa DOIS mecanismos, igual à lib Python:
+  //   1. endpoint direto /remote/{id}/status/  (pode retornar 404 na região BR — normal)
+  //   2. fallback via /notifications           (busca o correlationId nas notificações)
+  // Cancelável: se um novo comando for enviado, o polling anterior para.
+  const token  = Symbol(correlationId);
+  _pollCancelToken = token;
+
+  const MAX    = 75;   // 75 × 4s = 5 min
+  const DELAY  = 4000;
+  const SUCCESS = new Set(['success', 'succeeded', 'completed', 'complete']);
+  const FAILURE = new Set(['failure', 'failed', 'error', 'rejected']);
+
+  for (let i = 0; i < MAX; i++) {
+    await new Promise(r => setTimeout(r, DELAY));
+
+    // Cancelado por novo comando → para silenciosamente
+    if (_pollCancelToken !== token) return false;
+
+    setCmdStatus(`📡 Aguardando confirmação do veículo... (${i + 1}/${MAX})`);
+
+    // ── 1. Endpoint direto ────────────────────────────────────────────────
+    try {
+      const res  = await fetch(`/api/command/status?vin=${encodeURIComponent(vin)}&correlationId=${encodeURIComponent(correlationId)}`, { headers: apiHeaders() });
+      const data = await res.json();
+      const st   = (data.status || data.responseStatus || '').toLowerCase();
+      if (SUCCESS.has(st)) return true;
+      if (FAILURE.has(st)) throw new Error(`Comando rejeitado pelo veículo: ${st}`);
+      // 'pending' → continua para o fallback
+    } catch (err) {
+      if (err.message && err.message.startsWith('Comando rejeitado')) throw err;
+    }
+
+    if (_pollCancelToken !== token) return false;
+
+    // ── 2. Fallback via notificações ──────────────────────────────────────
+    try {
+      const res  = await fetch(`/api/command/notifications?vin=${encodeURIComponent(vin)}&correlationId=${encodeURIComponent(correlationId)}`, { headers: apiHeaders() });
+      const data = await res.json();
+      if (data.notifStatus === 'success') return true;
+      if (data.notifStatus === 'failure') throw new Error('Comando falhou conforme notificação do veículo');
+    } catch (err) {
+      if (err.message && (err.message.includes('falhou') || err.message.includes('rejeitado'))) throw err;
+    }
+  }
+
+  throw new Error(`Sem resposta após ${MAX * DELAY / 1000}s. O comando foi enviado com sucesso ao servidor Jeep, mas o veículo não confirmou — pode estar fora de cobertura de rede ou desligado. O comando será executado quando o carro reconectar.`);
+}
+
+async function sendRemoteCommand(cmdDef) {
+  const pin = document.getElementById('pin-input').value.trim();
+  if (!pin) {
+    setCmdStatus('⚠ Informe seu PIN primeiro', 'fail');
+    document.getElementById('pin-input').focus();
+    return;
+  }
+  if (!_currentVin) {
+    setCmdStatus('⚠ Carregue os dados do veículo primeiro', 'fail');
+    return;
+  }
+
+  const btn = document.getElementById(cmdDef.id);
+  const origLabel = btn.textContent;
+  btn.classList.add('loading');
+  btn.textContent = '';
+  setRemoteButtonsDisabled(true);
+  setCmdStatus(`⏳ Enviando comando "${cmdDef.command}"...`);
+
+  let correlationId = null;
+
+  try {
+    const res = await fetch('/api/command', {
+      method:  'POST',
+      headers: apiHeaders(),
+      body:    JSON.stringify({
+        vin:        _currentVin,
+        pin,
+        command:    cmdDef.command,
+        apiVersion: cmdDef.apiVersion,
+        cmdUrl:     cmdDef.cmdUrl,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      const msg = data.error || `HTTP ${res.status}`;
+      if (res.status === 403 || (msg && msg.toLowerCase().includes('pin'))) {
+        throw new Error('PIN incorreto. Verifique o PIN do app Uconnect.');
+      }
+      throw new Error(msg);
+    }
+
+    correlationId = data.correlationId;
+
+    // ── Confirmação imediata: o comando chegou ao servidor Jeep ──────────────
+    // Libera os botões e informa o usuário — o polling continua em background
+    btn.classList.remove('loading');
+    btn.textContent = origLabel;
+    setRemoteButtonsDisabled(false);
+    setCmdStatus(`📡 Comando enviado ao servidor Jeep! Aguardando confirmação do veículo...`);
+
+    // ── Polling em background — não bloqueia a UI ────────────────────────────
+    pollCommandStatus(_currentVin, correlationId)
+      .then(() => {
+        setCmdStatus(`✅ ${cmdDef.label} — confirmado pelo veículo!`, 'ok');
+        if (['REON', 'REOFF'].includes(cmdDef.command)) {
+          setTimeout(() => loadData(true), 4000);
+        }
+      })
+      .catch(err => {
+        // Timeout não é erro — o carro pode estar sem rede
+        const isTimeout = err.message.includes('Sem resposta');
+        if (isTimeout) {
+          setCmdStatus(
+            `📬 Comando enviado e aguardando veículo. Se o carro estiver sem rede, será executado quando reconectar.`,
+            'ok'
+          );
+        } else {
+          setCmdStatus(`❌ ${err.message}`, 'fail');
+        }
+      });
+
+    // Retorna imediatamente — o polling continua por conta própria
+    return;
+
+  } catch (err) {
+    // Erro real: PIN errado, rede, etc.
+    btn.classList.remove('loading');
+    btn.textContent = origLabel;
+    setRemoteButtonsDisabled(false);
+    setCmdStatus(`❌ ${err.message}`, 'fail');
+  }
+}
+
+// Registra eventos dos botões de controle
+REMOTE_COMMANDS.forEach(cmd => {
+  const btn = document.getElementById(cmd.id);
+  if (btn) btn.addEventListener('click', () => sendRemoteCommand(cmd));
+});
+
+// ─── EVENTS ──────────────────────────────────────────────────────────────────
+el('btn-refresh').addEventListener('click', loadData);
+el('btn-retry')  .addEventListener('click', loadData);
+
+// Auto-load ao abrir
+loadData();
+</script>
+</body>
+</html>
