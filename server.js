@@ -39,28 +39,33 @@ const IS_PROD = process.env.NODE_ENV === 'production' ||
                 process.env.RAILWAY_ENVIRONMENT === 'production' ||
                 !!process.env.RAILWAY_PROJECT_ID;
 
-// ─── Basic Auth ──────────────────────────────────────────────────────────────
-// Rotas da API exigem: Authorization: Basic base64(API_USER:API_PASSWORD)
-// O dashboard HTML (/) fica público para uso via browser local.
+// ─── Autenticação ────────────────────────────────────────────────────────────
+// 1. Login por PIN (APP_PIN no .env) → cookie de sessão. Usado pelo dashboard.
+// 2. Basic Auth (API_USER/API_PASSWORD) → opcional, para clientes externos.
+// Tentativas erradas nos dois contam para o bloqueio progressivo por IP.
+const auth = require('./auth.js');
+
 const API_USER     = process.env.API_USER     || '';
 const API_PASSWORD = process.env.API_PASSWORD || '';
 
-function checkAuth(req, res) {
-    // Se não configurou usuário/senha, auth desabilitada (modo local sem .env completo)
-    if (!API_USER || !API_PASSWORD) return true;
+function sendJson(res, status, obj, headers = {}) {
+    res.writeHead(status, { 'Content-Type': 'application/json', ...headers });
+    res.end(JSON.stringify(obj));
+}
 
+function sendLocked(res, retryAfter) {
+    sendJson(res, 429,
+        { error: 'Muitas tentativas inválidas. Tente novamente mais tarde.', retryAfter },
+        { 'Retry-After': String(retryAfter) });
+}
+
+// Valida o header Basic: true = válido, false = inválido, null = ausente/desabilitado
+function basicAuthResult(req) {
+    if (!API_USER || !API_PASSWORD) return null;
     const authHeader = req.headers['authorization'] || '';
-    if (!authHeader.startsWith('Basic ')) {
-        res.writeHead(401, {
-            'Content-Type': 'application/json',
-            'WWW-Authenticate': 'Basic realm="Uconnect API"',
-        });
-        res.end(JSON.stringify({ error: 'Autenticação necessária' }));
-        return false;
-    }
+    if (!authHeader.startsWith('Basic ')) return null;
 
-    const b64     = authHeader.slice(6);
-    const decoded = Buffer.from(b64, 'base64').toString('utf8');
+    const decoded = Buffer.from(authHeader.slice(6), 'base64').toString('utf8');
     const colon   = decoded.indexOf(':');
     const user    = decoded.slice(0, colon);
     const pass    = decoded.slice(colon + 1);
@@ -70,16 +75,27 @@ function checkAuth(req, res) {
         crypto.timingSafeEqual(Buffer.from(user), Buffer.from(API_USER));
     const passOk = pass.length === API_PASSWORD.length &&
         crypto.timingSafeEqual(Buffer.from(pass), Buffer.from(API_PASSWORD));
+    return userOk && passOk;
+}
 
-    if (!userOk || !passOk) {
-        res.writeHead(401, {
-            'Content-Type': 'application/json',
-            'WWW-Authenticate': 'Basic realm="Uconnect API"',
-        });
-        res.end(JSON.stringify({ error: 'Usuário ou senha inválidos' }));
+function checkAuth(req, res) {
+    if (auth.hasSession(req)) return true;
+
+    const ip     = auth.clientIp(req);
+    const locked = auth.lockStatus(ip);
+    if (locked) { sendLocked(res, locked); return false; }
+
+    const basic = basicAuthResult(req);
+    if (basic === true) return true;
+    if (basic === false) {
+        const r = auth.registerFailure(ip);
+        if (r.retryAfter) { sendLocked(res, r.retryAfter); return false; }
+        sendJson(res, 401, { error: 'Usuário ou senha inválidos' });
         return false;
     }
-    return true;
+
+    sendJson(res, 401, { error: 'Login necessário' });
+    return false;
 }
 
 // ─── Reutiliza toda a lógica do uconnect-api.js ───────────────────────────────
@@ -134,12 +150,40 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ── Rotas públicas (sem auth) ──────────────────────────────────────────────
-    const publicRoutes = ['/', '/index.html', '/api/health-check'];
+    // "/" é tratada mais abaixo: mostra o login quando não há sessão.
+    const publicRoutes = ['/', '/index.html', '/api/health-check', '/api/login', '/api/logout'];
     const isPublic = publicRoutes.includes(url.pathname) || url.pathname.startsWith('/public/');
 
-    // Aplica Basic Auth em todas as rotas /api/* exceto as públicas
+    // Exige sessão (PIN) ou Basic Auth em todas as rotas /api/* exceto as públicas
     if (url.pathname.startsWith('/api') && !isPublic) {
         if (!checkAuth(req, res)) return;
+    }
+
+    // ── POST /api/login — valida o PIN de acesso e cria a sessão ──────────────
+    if (url.pathname === '/api/login' && req.method === 'POST') {
+        const ip     = auth.clientIp(req);
+        const locked = auth.lockStatus(ip);
+        if (locked) { sendLocked(res, locked); return; }
+
+        let pin = '';
+        try { pin = String(JSON.parse(await readBody(req)).pin || ''); } catch {}
+
+        if (/^\d{4}$/.test(pin) && auth.pinMatches(pin)) {
+            auth.clearFailures(ip);
+            sendJson(res, 200, { ok: true }, { 'Set-Cookie': auth.createSession(req) });
+            return;
+        }
+
+        const r = auth.registerFailure(ip);
+        if (r.retryAfter) { sendLocked(res, r.retryAfter); return; }
+        sendJson(res, 401, { error: 'PIN incorreto', remaining: r.remaining });
+        return;
+    }
+
+    // ── POST /api/logout — encerra a sessão ───────────────────────────────────
+    if (url.pathname === '/api/logout' && req.method === 'POST') {
+        sendJson(res, 200, { ok: true }, { 'Set-Cookie': auth.destroySession(req) });
+        return;
     }
 
     // ── GET /api/health-check — Railway healthcheck (sem auth) ────────────────
@@ -445,24 +489,28 @@ const server = http.createServer(async (req, res) => {
 
     // ── Servir dashboard.html em / ─────────────────────────────────────────────
     if (url.pathname === '/' || url.pathname === '/index.html') {
+        const noStore = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' };
+
+        // Sem sessão → tela de login (com o tempo de bloqueio, se houver)
+        if (!auth.hasSession(req)) {
+            const locked = auth.lockStatus(auth.clientIp(req)) || 0;
+            const login  = fs.readFileSync(path.join(__dirname, 'login.html'), 'utf8')
+                .replace('<body>', `<body data-lock="${locked}">`);
+            res.writeHead(200, noStore);
+            res.end(login);
+            return;
+        }
+
         const htmlPath = path.join(__dirname, 'dashboard.html');
         if (!fs.existsSync(htmlPath)) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end('dashboard.html não encontrado');
             return;
         }
-        let html = fs.readFileSync(htmlPath, 'utf8');
-
-        // Injeta meta tag com Basic Auth para que o dashboard saiba se autenticar
-        // Só injeta se auth estiver configurado — caso contrário não expõe nada
-        if (API_USER && API_PASSWORD) {
-            const b64 = Buffer.from(`${API_USER}:${API_PASSWORD}`).toString('base64');
-            const metaTag = `<meta name="api-auth" content="Basic ${b64}">`;
-            html = html.replace('<head>', `<head>\n    ${metaTag}`);
-        }
-
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-        res.end(html);
+        // O dashboard se autentica pelo cookie de sessão — não injeta mais
+        // credenciais Basic Auth no HTML.
+        res.writeHead(200, noStore);
+        res.end(fs.readFileSync(htmlPath, 'utf8'));
         return;
     }
 
@@ -496,7 +544,8 @@ server.listen(PORT, HOST, () => {
     console.log('╠══════════════════════════════════════════════╣');
     console.log(`║  Porta:    ${String(PORT).padEnd(34)}║`);
     console.log(`║  API:      ${('/api/data').padEnd(34)}║`);
-    console.log(`║  Auth:     ${(API_USER ? 'Basic Auth ativo' : 'DESABILITADO (sem API_USER)').padEnd(34)}║`);
+    console.log(`║  Login:    ${(auth.PIN_IS_DEFAULT ? 'PIN padrão 1234 (defina APP_PIN)' : 'PIN do .env (APP_PIN)').padEnd(34)}║`);
+    console.log(`║  Basic:    ${(API_USER ? 'ativo para clientes externos' : 'desabilitado (sem API_USER)').padEnd(34)}║`);
     console.log(`║  Cache:    ${String(CACHE_TTL_MS / 60000 + ' min TTL').padEnd(34)}║`);
     console.log('╠══════════════════════════════════════════════╣');
     console.log('║  Para parar o servidor: Ctrl+C               ║');

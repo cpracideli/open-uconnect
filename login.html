@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Uconnect — Entrar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #0066cc;
+      --text:    #1d1d1f;
+      --muted:   #86868b;
+      --border:  #e5e5ea;
+      --danger:  #c7261c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background: #f2f2f7;
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .box {
+      width: 100%;
+      max-width: 360px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px 24px 28px;
+      text-align: center;
+    }
+    .icon { width: 44px; height: 44px; color: var(--primary); margin: 0 auto 12px; display: block; }
+    h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+    .hint { color: var(--muted); font-size: .95rem; margin-top: 6px; }
+    form { margin-top: 24px; }
+    input {
+      width: 100%;
+      max-width: 200px;
+      min-height: 56px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f7f7fa;
+      font-family: inherit;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 14px;
+      text-indent: 14px;
+      text-align: center;
+      color: var(--text);
+    }
+    input:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(0,102,204,.15); }
+    input:disabled { opacity: .5; }
+    button {
+      display: block;
+      width: 100%;
+      min-height: 52px;
+      margin-top: 16px;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #fff;
+      font-family: inherit;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .4; cursor: default; }
+    button:focus-visible { outline: 3px solid rgba(0,102,204,.45); outline-offset: 2px; }
+    .msg { min-height: 1.4em; margin-top: 14px; font-size: .95rem; line-height: 1.4; }
+    .msg.fail { color: var(--danger); }
+  </style>
+</head>
+<body>
+  <main class="box">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    <h1>Uconnect</h1>
+    <p class="hint">Digite o PIN de acesso</p>
+
+    <form id="form" autocomplete="off">
+      <input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4"
+             aria-label="PIN de acesso" autofocus required />
+      <button id="btn" type="submit" disabled>Entrar</button>
+      <p class="msg" id="msg" role="status" aria-live="polite"></p>
+    </form>
+  </main>
+
+<script>
+const form = document.getElementById('form');
+const pin  = document.getElementById('pin');
+const btn  = document.getElementById('btn');
+const msg  = document.getElementById('msg');
+let timer  = null;
+let busy   = false;
+
+function show(text, fail) {
+  msg.textContent = text;
+  msg.className = 'msg' + (fail ? ' fail' : '');
+}
+
+function fmt(sec) {
+  if (sec >= 3600) return `${Math.ceil(sec / 3600)} h`;
+  if (sec >= 60) {
+    const m = Math.floor(sec / 60), s = sec % 60;
+    return s ? `${m} min ${s} s` : `${m} min`;
+  }
+  return `${sec} s`;
+}
+
+function lockFor(sec) {
+  clearInterval(timer);
+  pin.value = '';
+  pin.disabled = true;
+  btn.disabled = true;
+  const until = Date.now() + sec * 1000;
+  const tick = () => {
+    const left = Math.ceil((until - Date.now()) / 1000);
+    if (left <= 0) {
+      clearInterval(timer);
+      pin.disabled = false;
+      show('');
+      pin.focus();
+      return;
+    }
+    show(`Muitas tentativas erradas. Tente de novo em ${fmt(left)}.`, true);
+  };
+  tick();
+  timer = setInterval(tick, 1000);
+}
+
+pin.addEventListener('input', () => {
+  pin.value = pin.value.replace(/\D/g, '').slice(0, 4);
+  btn.disabled = pin.value.length !== 4;
+  if (pin.value.length === 4) form.requestSubmit();
+});
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (busy || pin.disabled || pin.value.length !== 4) return;
+  busy = true;
+  btn.disabled = true;
+  show('Verificando…');
+  try {
+    const res  = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: pin.value }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) { location.replace('/'); return; }
+    if (res.status === 429) { lockFor(data.retryAfter || 60); return; }
+    pin.value = '';
+    pin.focus();
+    show(data.remaining
+      ? `PIN incorreto. ${data.remaining === 1 ? 'Resta 1 tentativa' : `Restam ${data.remaining} tentativas`} antes do bloqueio.`
+      : (data.error || 'PIN incorreto.'), true);
+  } catch {
+    show('Sem conexão com o servidor. Tente de novo.', true);
+    btn.disabled = pin.value.length !== 4;
+  } finally {
+    busy = false;
+  }
+});
+
+// Se a página abriu com o IP já bloqueado, o servidor informa o tempo restante
+const initialLock = Number(document.body.dataset.lock || 0);
+if (initialLock > 0) lockFor(initialLock);
+</script>
+</body>
+</html>

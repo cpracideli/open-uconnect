@@ -981,6 +981,20 @@
     .global-nav-links > span > span:hover { color: inherit; font-weight: inherit; }
     .global-nav-links svg { color: inherit; stroke: currentColor; }
 
+    .logout-btn {
+      display: block;
+      margin: 20px auto 0;
+      min-height: 44px;
+      padding: 0 24px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: .95rem;
+      cursor: pointer;
+    }
+    .logout-btn:focus-visible { outline: 3px solid rgba(0,102,204,.45); outline-offset: 2px; border-radius: 8px; }
+
     /* Informações adicionais (recolhido por padrão) */
     .more-data { margin-top: 12px; }
     .more-data > summary {
@@ -1268,6 +1282,7 @@
       Atualizar dados
     </button>
     <div id="refresh-status"></div>
+    <button type="button" class="logout-btn" onclick="logout()">Sair</button>
   </div>
 
 </main>
@@ -1337,6 +1352,22 @@ function apiHeaders(extra) {
     const h = { 'Content-Type': 'application/json', ...extra };
     if (API_AUTH) h['Authorization'] = API_AUTH;
     return h;
+}
+
+// ─── Sessão expirada → volta para a tela de login ──────────────────────────
+const _fetch = window.fetch.bind(window);
+window.fetch = async (...args) => {
+  const res = await _fetch(...args);
+  const url = String(args[0] && args[0].url || args[0]);
+  if (res.status === 401 && location.protocol.startsWith("http") && url.includes("/api/") && !url.includes("/api/login")) {
+    location.replace("/");
+  }
+  return res;
+};
+
+async function logout() {
+  try { await _fetch("/api/logout", { method: "POST" }); } catch {}
+  location.replace("/");
 }
 
 // ─── DADOS EMBUTIDOS (atualizados pelo script Node.js) ───────────────────────
