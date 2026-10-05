@@ -3,45 +3,130 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Uconnect Dashboard — 23/06/2026, 22:31:21</title>
+  <title>Uconnect Dashboard — 26/06/2026, 22:28:23</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg:       #0d0f14;
-      --surface:  #161b26;
-      --card:     #1e2535;
-      --border:   #2a3347;
-      --accent:   #e63312;
-      --accent2:  #ff6b35;
-      --text:     #e8eaf0;
-      --muted:    #7a859a;
-      --ok:       #22c55e;
-      --warn:     #f59e0b;
-      --danger:   #ef4444;
-      --radius:   14px;
+      --primary:       #0066cc;
+      --primary-focus: #0071e3;
+      --ok:            #30d158;
+      --warn:          #ff9f0a;
+      --danger:        #ff453a;
+      --blue:          #0066cc;
+      --purple:        #af52de;
+      --text:          #1d1d1f;
+      --muted:         #7a7a7a;
+      --muted2:        rgba(0, 0, 0, 0.3);
+      --border:        rgba(0, 0, 0, 0.08);
+      --border-hi:     rgba(0, 0, 0, 0.12);
+      --radius:        18px;
+      --radius-sm:     8px;
+      --radius-pill:   9999px;
+      --font:          'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --canvas:        #ffffff;
+      --canvas-bg:     #f5f5f7;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
     body {
-      background: var(--bg);
+      background-color: var(--canvas-bg);
       color: var(--text);
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-family: var(--font);
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    /* ── Header ── */
-    header {
-      background: linear-gradient(135deg, var(--accent) 0%, #a01f0a 100%);
-      padding: 20px 32px;
+    /* Garante que o conteúdo fique acima do fundo */
+    header, #loading, #error-box, main { position: relative; z-index: 1; }
+
+    /* ── Barra de Navegação Global (Apple Style) ── */
+    .global-nav {
+      height: 44px;
+      background: #000000;
+      color: #ffffff;
+      font-size: 12px;
       display: flex;
       align-items: center;
-      gap: 16px;
-      box-shadow: 0 4px 24px rgba(230,51,18,.35);
+      position: sticky;
+      top: 0;
+      z-index: 201;
+      border-bottom: 1px solid #1a1a1a;
     }
-    header svg { flex-shrink: 0; }
-    header h1  { font-size: 1.5rem; font-weight: 700; letter-spacing: .5px; }
-    header p   { font-size: .85rem; opacity: .8; margin-top: 2px; }
-    #last-update { margin-left: auto; font-size: .78rem; opacity: .75; text-align: right; }
+    .global-nav-container {
+      width: 100%;
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .global-nav-logo {
+      font-weight: 600;
+      letter-spacing: -0.12px;
+    }
+    .global-nav-links {
+      display: flex;
+      gap: 24px;
+    }
+    .global-nav-links span {
+      color: #86868b;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .global-nav-links span:hover, .global-nav-links span.active {
+      color: #ffffff;
+    }
+
+    /* ── Sub-navegação Flutuante e Translúcida (Frosted Glass) ── */
+    .sub-nav-frosted {
+      height: 52px;
+      background: rgba(245, 245, 247, 0.8);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 44px;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+    }
+    .sub-nav-container {
+      width: 100%;
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sub-nav-title {
+      font-family: 'SF Pro Display', -apple-system, sans-serif;
+      font-size: 21px;
+      font-weight: 600;
+      letter-spacing: 0.231px;
+      color: #1d1d1f;
+    }
+    .sub-nav-model-year {
+      font-weight: 400;
+      font-size: 14px;
+      color: var(--muted);
+      margin-left: 6px;
+    }
+    #last-update {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: right;
+      line-height: 1.35;
+    }
+    #last-update strong {
+      color: var(--text);
+    }
 
     /* ── Loading / Error ── */
     #loading, #error-box {
@@ -53,226 +138,488 @@
       gap: 16px;
     }
     .spinner {
-      width: 48px; height: 48px;
-      border: 4px solid var(--border);
-      border-top-color: var(--accent);
+      width: 36px; height: 36px;
+      border: 3px solid rgba(0,0,0,.08);
+      border-top-color: var(--primary);
       border-radius: 50%;
-      animation: spin .8s linear infinite;
+      animation: spin .8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    #loading p { font-size: .88rem; color: var(--muted); }
     #error-box { color: var(--danger); }
-    #error-box pre { background: var(--card); padding: 16px; border-radius: var(--radius); font-size: .8rem; max-width: 600px; overflow: auto; }
+    #error-box pre {
+      background: rgba(255,69,58,.04);
+      border: 1px solid rgba(255,69,58,.15);
+      padding: 16px; border-radius: var(--radius-sm);
+      font-size: .8rem; max-width: 560px; overflow: auto;
+      color: var(--text);
+    }
 
     /* ── Main grid ── */
-    main { max-width: 1100px; margin: 0 auto; padding: 32px 20px; display: none; }
+    main { max-width: 1060px; margin: 0 auto; padding: 24px 20px 72px; display: none; }
 
-    /* ── Vehicle hero ── */
-    .vehicle-hero {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px 28px;
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      margin-bottom: 28px;
-    }
-    .vehicle-icon { font-size: 4rem; line-height: 1; }
-    .vehicle-name { font-size: 1.6rem; font-weight: 700; }
-    .vehicle-sub  { color: var(--muted); font-size: .9rem; margin-top: 4px; }
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 99px;
-      font-size: .72rem;
-      font-weight: 600;
-      letter-spacing: .4px;
-      background: rgba(34,197,94,.15);
-      color: var(--ok);
-      border: 1px solid rgba(34,197,94,.3);
-      margin-top: 8px;
-    }
-
-    /* ── Grid cards ── */
-    .grid { display: grid; gap: 20px; }
-    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-
+    /* ── Card Estilo Apple ── */
     .card {
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: var(--canvas);
       border-radius: var(--radius);
-      padding: 20px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: none;
     }
     .card-title {
-      font-size: .72rem;
+      font-size: .75rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
       color: var(--muted);
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    /* ── Stat ── */
-    .stat-value { font-size: 2.2rem; font-weight: 700; line-height: 1; }
-    .stat-unit  { font-size: .85rem; color: var(--muted); margin-top: 4px; }
-
-    /* ── Progress bar ── */
-    .progress-wrap {
-      background: var(--border);
-      border-radius: 99px;
-      height: 10px;
+    /* ── Veículo Hero ── */
+    .vehicle-hero {
+      background: var(--canvas);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
       overflow: hidden;
-      margin-top: 12px;
+      display: flex;
+      align-items: stretch;
+      margin-bottom: 24px;
+      min-height: 220px;
+    }
+    .vehicle-hero-img-wrap {
+      flex: 1 1 60%;
+      position: relative;
+      overflow: hidden;
+      min-height: 180px;
+      background: radial-gradient(circle at center, #ffffff 0%, #f5f5f7 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .vehicle-hero-img-wrap img {
+      max-width: 85%;
+      max-height: 160px;
+      object-fit: contain;
+      padding: 16px;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,.12));
+      display: block;
+    }
+    .vehicle-hero-info {
+      flex: 0 0 280px;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-left: 1px solid var(--border);
+      background: var(--canvas);
+    }
+    .vehicle-name {
+      font-family: 'SF Pro Display', -apple-system, sans-serif;
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      color: var(--text);
+    }
+    .vehicle-sub  { color: var(--muted); font-size: .88rem; margin-top: 8px; line-height: 1.6; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      font-size: .72rem;
+      font-weight: 600;
+      background: rgba(48,209,88,.10);
+      color: #24b23e;
+      border: 1px solid rgba(48,209,88,.2);
+      margin-top: 14px;
+      width: fit-content;
+    }
+    @media (max-width: 640px) {
+      .vehicle-hero { flex-direction: column; }
+      .vehicle-hero-info { width: 100%; border-left: none; border-top: 1px solid var(--border); padding: 20px; }
+    }
+
+    /* ── Grid ── */
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+    /* ── Métrica / Estatística ── */
+    .stat-value {
+      font-family: 'SF Pro Display', -apple-system, sans-serif;
+      font-size: 38px;
+      font-weight: 600;
+      letter-spacing: -0.8px;
+      line-height: 1;
+      color: var(--text);
+    }
+    .stat-unit  { font-size: .8rem; color: var(--muted); margin-top: 6px; }
+
+    /* ── Barra de Progresso ── */
+    .progress-wrap {
+      background: rgba(0,0,0,.05);
+      border-radius: var(--radius-pill);
+      height: 6px;
+      overflow: hidden;
+      margin-top: 14px;
     }
     .progress-bar {
       height: 100%;
-      border-radius: 99px;
-      transition: width .6s ease;
+      border-radius: var(--radius-pill);
+      transition: width .8s cubic-bezier(.4,0,.2,1);
     }
-    .bar-ok     { background: linear-gradient(90deg, var(--ok), #16a34a); }
-    .bar-warn   { background: linear-gradient(90deg, var(--warn), #d97706); }
-    .bar-danger { background: linear-gradient(90deg, var(--danger), #b91c1c); }
+    .bar-ok     { background: var(--ok); }
+    .bar-warn   { background: var(--warn); }
+    .bar-danger { background: var(--danger); }
 
-    /* ── Tyre grid ── */
+    /* ── Pressão de Pneus ── */
     .tyre-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
     }
     .tyre-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
+      background: #fafafc;
+      border-radius: var(--radius-sm);
+      padding: 14px 10px;
       text-align: center;
+      border: 1px solid var(--border);
     }
     .tyre-item.warn {
-      border-color: var(--danger);
-      background: rgba(239,68,68,.08);
+      border-color: rgba(255,69,58,.3);
+      background: rgba(255,69,58,.04);
     }
-    .tyre-label  { font-size: .7rem; color: var(--muted); font-weight: 600; letter-spacing: .5px; }
-    .tyre-value  { font-size: 1.3rem; font-weight: 700; margin: 4px 0; }
-    .tyre-status { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
-    .status-ok     { color: var(--ok); }
-    .status-warn   { color: var(--danger); }
+    .tyre-label  { font-size: .65rem; color: var(--muted); font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+    .tyre-value  { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.4px; margin: 4px 0 2px; color: var(--text); }
+    .tyre-status { font-size: .62rem; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
 
-    /* ── Battery ── */
+    /* ── Bateria ── */
     .battery-wrap {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-top: 8px;
+      gap: 10px;
+      margin-top: 10px;
     }
     .battery-body {
       flex: 1;
-      height: 30px;
-      background: var(--border);
-      border-radius: 6px;
-      border: 2px solid var(--muted);
+      height: 20px;
+      background: rgba(0,0,0,.04);
+      border-radius: 4px;
+      border: 1.5px solid rgba(0,0,0,.15);
       position: relative;
       overflow: visible;
     }
     .battery-body::after {
       content: '';
       position: absolute;
-      right: -8px;
+      right: -6px;
       top: 50%;
       transform: translateY(-50%);
-      width: 6px;
-      height: 14px;
-      background: var(--muted);
-      border-radius: 0 3px 3px 0;
+      width: 4px;
+      height: 10px;
+      background: rgba(0,0,0,.2);
+      border-radius: 0 2px 2px 0;
     }
     .battery-fill {
       height: 100%;
-      border-radius: 4px;
-      background: linear-gradient(90deg, var(--ok), #16a34a);
+      border-radius: 2px;
+      background: var(--ok);
     }
     .battery-text {
       font-size: .75rem;
       color: var(--muted);
     }
 
-    /* ── Trips ── */
+    /* ── Viagens ── */
     .trip-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 0;
+      padding: 11px 0;
       border-bottom: 1px solid var(--border);
     }
     .trip-row:last-child { border-bottom: none; }
-    .trip-name { font-weight: 600; font-size: .9rem; }
-    .trip-dist { font-size: 1.1rem; font-weight: 700; color: var(--accent2); }
-    .trip-eff  { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+    .trip-name { font-weight: 600; font-size: .9rem; color: var(--text); }
+    .trip-dist { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.2px; color: var(--text); }
+    .trip-eff  { font-size: .75rem; color: var(--muted); margin-top: 2px; }
 
-    /* ── Info table ── */
+    /* ── Tabelas de Informações ── */
     .info-table { width: 100%; border-collapse: collapse; }
     .info-table tr { border-bottom: 1px solid var(--border); }
     .info-table tr:last-child { border-bottom: none; }
-    .info-table td { padding: 9px 4px; font-size: .88rem; }
+    .info-table td { padding: 11px 6px; font-size: .88rem; color: var(--text); }
     .info-table td:first-child { color: var(--muted); width: 45%; }
-    .info-table td:last-child  { font-weight: 600; }
+    .info-table td:last-child  { font-weight: 500; }
 
-    /* ── Services ── */
-    .services-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+    /* ── Serviços Ativos ── */
+    .services-wrap { display: flex; flex-wrap: wrap; gap: 7px; }
     .svc-chip {
-      font-size: .7rem;
+      font-size: .68rem;
       font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 99px;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
       border: 1px solid;
-      letter-spacing: .3px;
+      letter-spacing: .15px;
     }
-    .svc-on  { color: var(--ok);   border-color: rgba(34,197,94,.4);  background: rgba(34,197,94,.08); }
-    .svc-off { color: var(--muted); border-color: var(--border);      background: transparent; }
+    .svc-on  { color: #24b23e; border-color: rgba(48,209,88,.25); background: rgba(48,209,88,.05); }
+    .svc-off { color: var(--muted); border-color: var(--border); background: #fafafc; }
 
-    /* ── Refresh button ── */
-    .refresh-wrap { text-align: center; margin-top: 32px; }
+    /* ── Botão Atualizar (Principal) ── */
+    .refresh-wrap { text-align: center; margin-top: 40px; }
     #btn-refresh {
-      background: var(--accent);
+      background: var(--primary);
       color: #fff;
       border: none;
-      padding: 12px 32px;
-      border-radius: 99px;
-      font-size: .9rem;
-      font-weight: 600;
+      padding: 14px 44px;
+      border-radius: var(--radius-pill);
+      font-size: .95rem;
+      font-weight: 500;
+      font-family: var(--font);
+      letter-spacing: -0.1px;
       cursor: pointer;
-      transition: opacity .2s;
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: none;
     }
-    #btn-refresh:hover { opacity: .85; }
-    #btn-refresh:disabled { opacity: .4; cursor: default; }
+    #btn-refresh:hover:not(:disabled) { background: var(--primary-focus); }
+    #btn-refresh:active:not(:disabled) { transform: scale(.96); }
+    #btn-refresh:disabled { opacity: .35; cursor: default; }
+    #refresh-status { font-size:.78rem; color:var(--muted); margin-top:12px; min-height:1em; }
 
-    /* ── Section header ── */
+    /* ── Títulos das Seções ── */
     .section-title {
-      font-size: .75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      color: var(--muted);
-      margin: 32px 0 14px;
+      font-family: 'SF Pro Display', -apple-system, sans-serif;
+      font-size: 21px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      color: var(--text);
+      margin: 36px 0 16px;
+      padding-left: 4px;
     }
+
+    /* ── Histórico de Manutenção ── */
+    .maint-empty {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--muted);
+    }
+    .maint-empty-icon { font-size: 2rem; margin-bottom: 8px; opacity: .7; }
+    .maint-empty p    { font-size: .85rem; margin-top: 4px; }
+
+    .maint-record {
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .maint-record:last-child { border-bottom: none; }
+    .maint-icon {
+      width: 36px; height: 36px;
+      background: rgba(0, 102, 204, 0.05);
+      border: 1px solid rgba(0, 102, 204, 0.12);
+      color: var(--primary);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .maint-info  { flex: 1; }
+    .maint-desc  { font-weight: 600; font-size: .88rem; color: var(--text); }
+    .maint-meta  { font-size: .75rem; color: var(--muted); margin-top: 3px; }
+    .maint-km    { font-size: .85rem; font-weight: 600; color: var(--muted); white-space: nowrap; }
+
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+    }
+    .cat-item {
+      background: #fafafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: .75rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cat-item::before { content: '🔧'; font-size: .8rem; }
+
+    /* ── Painel de Controle Remoto ── */
+    .remote-panel {
+      background: var(--canvas);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+    .remote-panel-title {
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .remote-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .remote-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--radius-pill);
+      background: #fafafc;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+    .remote-btn:hover:not(:disabled) {
+      background: #e8e8ed;
+      border-color: rgba(0,0,0,0.15);
+    }
+    .remote-btn:active:not(:disabled) { transform: scale(.96); }
+    .remote-btn:disabled { opacity: .35; cursor: default; }
+
+    .remote-btn.btn-on  { border-color: rgba(48,209,88,.4); color: #24b23e; background: rgba(48,209,88,.06); }
+    .remote-btn.btn-on:hover:not(:disabled) { background: rgba(48,209,88,.12); }
+    .remote-btn.btn-off { border-color: rgba(255,69,58,.4); color: #ff453a; background: rgba(255,69,58,.06); }
+    .remote-btn.btn-off:hover:not(:disabled) { background: rgba(255,69,58,.12); }
+    .remote-btn.btn-unlock { border-color: rgba(255,159,10,.4); color: #e08800; background: rgba(255,159,10,.06); }
+    .remote-btn.btn-unlock:hover:not(:disabled) { background: rgba(255,159,10,.12); }
+    .remote-btn.btn-lock   { border-color: rgba(0,102,204,.4); color: #0066cc; background: rgba(0,102,204,.06); }
+    .remote-btn.btn-lock:hover:not(:disabled) { background: rgba(0,102,204,.12); }
+    .remote-btn.btn-horn        { border-color: rgba(191,90,242,.4); color: #bf5af2; background: rgba(191,90,242,.06); }
+    .remote-btn.btn-horn:hover:not(:disabled) { background: rgba(191,90,242,.12); }
+    .remote-btn.btn-lights      { border-color: rgba(255,214,10,.5); color: #b59500; background: rgba(255,214,10,.06); }
+    .remote-btn.btn-lights:hover:not(:disabled) { background: rgba(255,214,10,.12); }
+    .remote-btn.btn-trunk-unlock{ border-color: rgba(48,209,88,.3); color: #24b23e; background: rgba(48,209,88,.05); }
+    .remote-btn.btn-trunk-unlock:hover:not(:disabled) { background: rgba(48,209,88,.1); }
+    .remote-btn.btn-trunk-lock  { border-color: rgba(48,209,88,.25); color: #24b23e; background: rgba(48,209,88,.04); }
+    .remote-btn.btn-trunk-lock:hover:not(:disabled) { background: rgba(48,209,88,.08); }
+    .remote-btn.btn-precond-on  { border-color: rgba(0,102,204,.3); color: #0066cc; background: rgba(0,102,204,.05); }
+    .remote-btn.btn-precond-on:hover:not(:disabled) { background: rgba(0,102,204,.1); }
+    .remote-btn.btn-precond-off { border-color: rgba(0,102,204,.2); color: #0066cc; background: rgba(0,102,204,.04); }
+    .remote-btn.btn-precond-off:hover:not(:disabled) { background: rgba(0,102,204,.08); }
+    .remote-btn.btn-gps         { border-color: rgba(191,90,242,.3); color: #bf5af2; background: rgba(191,90,242,.05); }
+    .remote-btn.btn-gps:hover:not(:disabled) { background: rgba(191,90,242,.1); }
+
+    .refresh-mini {
+      margin-top: 14px;
+      padding: 6px 16px;
+      font-size: 13px;
+      background: #fafafc;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--font);
+    }
+    .refresh-mini:hover { background: #e8e8ed; color: #000000; border-color: rgba(0,0,0,0.15); }
+    .refresh-mini:active { transform: scale(0.96); }
+
+    .door-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--border); font-size: .88rem;
+    }
+    .door-row:last-child { border-bottom: none; }
+    .door-icon { font-size: 1rem; margin-right: .35rem; }
+    .status-locked   { color: #24b23e; font-weight: 500; }
+    .status-unlocked { color: var(--danger); font-weight: 500; }
+    .status-closed   { color: #24b23e; font-weight: 500; }
+    .status-open     { color: var(--danger); font-weight: 500; }
+
+    .map-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 14px; padding: 7px 18px;
+      background: #fafafc;
+      border: 1px solid rgba(0, 102, 204, 0.2);
+      border-radius: var(--radius-pill); color: var(--primary);
+      text-decoration: none; font-size: .82rem; transition: all .2s;
+      font-weight: 500;
+    }
+    .map-link:hover { background: rgba(0, 102, 204, 0.05); border-color: var(--primary); }
+    .trip-row {
+      display: flex; justify-content: space-between; padding: .65rem 0;
+      border-bottom: 1px solid var(--border); font-size: .86rem;
+    }
+    .trip-row:last-child { border-bottom: none; }
+    .remote-btn.loading::before {
+      content: '';
+      width: 13px; height: 13px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: inline-block;
+    }
+    .pin-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .pin-row label { font-size: .85rem; color: var(--muted); font-weight: 500; }
+    .pin-input {
+      background: #f5f5f7;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: .92rem;
+      font-family: var(--font);
+      width: 104px;
+      letter-spacing: 5px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .pin-input:focus { outline: none; border-color: var(--primary); background: var(--canvas); box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15); }
+    .cmd-status {
+      margin-top: 16px;
+      font-size: .85rem;
+      color: var(--muted);
+      min-height: 1.2em;
+    }
+    .cmd-status.ok   { color: #24b23e; font-weight: 500; }
+    .cmd-status.fail { color: var(--danger); font-weight: 500; }
   </style>
 </head>
 <body>
 
-<header>
-  <!-- Jeep-like icon -->
-  <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-    <rect width="38" height="38" rx="10" fill="rgba(255,255,255,.15)"/>
-    <path d="M8 12h22M8 19h22M8 26h22" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
-    <circle cx="13" cy="30" r="3" fill="#fff"/>
-    <circle cx="25" cy="30" r="3" fill="#fff"/>
-  </svg>
-  <div>
-    <h1>Uconnect Dashboard</h1>
-    <p>Jeep Compass — Dados em tempo real</p>
+<div class="global-nav">
+  <div class="global-nav-container">
+    <div class="global-nav-logo"> Uconnect</div>
+    <div class="global-nav-links">
+      <span class="active">Painel</span>
+      <span>Veículo</span>
+      <span>Status</span>
+    </div>
   </div>
-  <div id="last-update">—</div>
+</div>
+
+<header class="sub-nav-frosted">
+  <div class="sub-nav-container">
+    <div class="sub-nav-title">Jeep Compass <span class="sub-nav-model-year">2022</span></div>
+    <div id="last-update">—</div>
+  </div>
 </header>
 
 <div id="loading">
@@ -281,16 +628,41 @@
 </div>
 
 <div id="error-box" style="display:none">
-  <span style="font-size:2.5rem">⚠️</span>
-  <strong>Erro ao carregar dados</strong>
+  <span style="font-size:2rem">⚠️</span>
+  <strong style="font-size:1rem;font-weight:600;letter-spacing:-0.2px">Erro ao carregar dados</strong>
   <pre id="error-msg"></pre>
-  <button id="btn-retry" style="background:var(--accent);color:#fff;border:none;padding:10px 28px;border-radius:99px;cursor:pointer;font-size:.9rem">Tentar novamente</button>
+  <button id="btn-retry" style="background:var(--primary);color:#fff;border:none;padding:10px 28px;border-radius:var(--radius-pill);cursor:pointer;font-size:.88rem;font-weight:500;font-family:var(--font);">Tentar novamente</button>
 </div>
 
 <main id="main">
 
   <!-- Vehicle hero -->
   <div class="vehicle-hero" id="hero"></div>
+
+  <!-- Controle Remoto -->
+  <p class="section-title">🎮 Controle Remoto</p>
+  <div class="remote-panel" id="remote-panel">
+    <div class="remote-panel-title">Comandos do Veículo</div>
+    <div class="pin-row">
+      <label for="pin-input">🔒 PIN:</label>
+      <input type="password" id="pin-input" class="pin-input" placeholder="••••" maxlength="6" inputmode="numeric" />
+      <span style="font-size:.75rem;color:var(--muted)">(mesmo PIN do app Uconnect)</span>
+    </div>
+    <div class="remote-buttons">
+      <button class="remote-btn btn-on"  id="btn-engine-on" >🔑 Ligar Motor</button>
+      <button class="remote-btn btn-off" id="btn-engine-off">⏹ Desligar Motor</button>
+      <button class="remote-btn btn-unlock" id="btn-doors-unlock">🔓 Destrancar</button>
+      <button class="remote-btn btn-lock"   id="btn-doors-lock"  >🔐 Trancar</button>
+      <button class="remote-btn btn-horn"   id="btn-horn"        >📯 Buzina + Luzes</button>
+      <button class="remote-btn btn-lights" id="btn-lights"      >💡 Só Luzes</button>
+      <button class="remote-btn btn-trunk-unlock" id="btn-trunk-unlock">📦 Abrir Porta-Malas</button>
+      <button class="remote-btn btn-trunk-lock"   id="btn-trunk-lock"  >📦🔐 Fechar Porta-Malas</button>
+      <button class="remote-btn btn-precond-on"   id="btn-precond-on"  >❄️ Pré-climatizar</button>
+      <button class="remote-btn btn-precond-off"  id="btn-precond-off" >❄️ Parar Clim.</button>
+      <button class="remote-btn btn-gps" id="btn-gps-update">&#x1F4CD; Atualizar GPS</button>
+    </div>
+    <div class="cmd-status" id="cmd-status">⬆ Informe seu PIN e clique em um comando</div>
+  </div>
 
   <!-- Key metrics -->
   <p class="section-title">📊 Status Atual</p>
@@ -308,7 +680,47 @@
       <div id="trips"></div>
     </div>
   </div>
+  <!-- Portas / Janelas / Status Remoto -->
+  <p class="section-title">🚪 Portas & Janelas</p>
+  <div class="grid grid-2">
+    <div class="card" id="doors-card">
+      <div class="card-title">🚪 Status das Portas</div>
+      <div id="doors-status"><span class="muted">Clique em “Atualizar” para carregar</span></div>
+      <button class="refresh-mini" id="btn-refresh-doors" onclick="loadDoorsStatus()">🔄 Atualizar</button>
+    </div>
+    <div class="card" id="location-card">
+      <div class="card-title">📍 Localização GPS</div>
+      <div id="location-status"><span class="muted">Clique em “Atualizar” para carregar</span></div>
+      <button class="refresh-mini" id="btn-refresh-location" onclick="loadLocationStatus()">🔄 Atualizar</button>
+    </div>
+  </div>
 
+  <!-- Última Viagem -->
+  <p class="section-title">🏎️ Última Viagem</p>
+  <div class="grid grid-2">
+    <div class="card" id="lasttrip-card">
+      <div class="card-title">🗓 Dados da Viagem</div>
+      <div id="lasttrip-data"><span class="muted">Clique em “Atualizar” para carregar</span></div>
+      <button class="refresh-mini" onclick="loadLastTrip()">🔄 Atualizar</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Eco Score</div>
+      <div id="ecoscore-data"><span class="muted">Disponível após atualizar viagem</span></div>
+    </div>
+  </div>
+
+  <!-- Manutenção -->
+  <p class="section-title">📖 Histórico de Manutenção</p>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">📅 Registros de Serviço</div>
+      <div id="maint-history"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📂 Categorias Disponíveis</div>
+      <div class="cat-grid" id="maint-categories"></div>
+    </div>
+  </div>
   <!-- Vehicle info + Services -->
   <p class="section-title">🚗 Informações do Veículo</p>
   <div class="grid grid-2">
@@ -324,6 +736,7 @@
 
   <div class="refresh-wrap">
     <button id="btn-refresh">🔄 Atualizar dados</button>
+    <div id="refresh-status"></div>
   </div>
 
 </main>
@@ -334,9 +747,19 @@
 // OU, se abrir localmente como file://, usamos os dados embutidos diretamente.
 // Para uso real com servidor (ex: npx serve .), o endpoint /api/data é preferido.
 
-const API_ENDPOINT = null; // ex: 'http://localhost:3000/api/data'
-const JSON_FILE    = null; // ex: 'uconnect-result-1782264487381.json'
-                           // deixe null para usar dados embutidos abaixo
+// API sempre aponta para a mesma origin (funciona local e em produção no Railway)
+const API_ENDPOINT = `${location.protocol}//${location.host}/api/data`;
+const JSON_FILE = null; // ex: 'uconnect-result-1782264487381.json'
+
+// ─── Auth header para as chamadas de API ─────────────────────────────────────
+// Em produção, preenchido pelo servidor via meta tag; localmente sem auth.
+const _authMeta = document.querySelector('meta[name="api-auth"]');
+const API_AUTH  = _authMeta ? _authMeta.content : null;
+function apiHeaders(extra) {
+    const h = { 'Content-Type': 'application/json', ...extra };
+    if (API_AUTH) h['Authorization'] = API_AUTH;
+    return h;
+}
 
 // ─── DADOS EMBUTIDOS (atualizados pelo script Node.js) ───────────────────────
 // Execute: node uconnect-api.js && node embed-data.js   (veja instrução abaixo)
@@ -344,7 +767,7 @@ const JSON_FILE    = null; // ex: 'uconnect-result-1782264487381.json'
 let EMBEDDED_DATA = null;
 try {
   EMBEDDED_DATA = JSON.parse(`{
-  "timestamp": "2026-06-24T01:28:07.381Z",
+  "timestamp": "2026-06-27T01:28:06.427Z",
   "userId": "a8ccd0e04c1d4e4ea9b91779f18d0f17",
   "vehicles": [
     {
@@ -784,21 +1207,21 @@ try {
         "distanceUnit": "km",
         "odometer": {
           "odometer": {
-            "value": "57416",
+            "value": "57479",
             "unit": "km"
           }
         },
         "daysToService": "null",
         "hvbatSOH": null,
         "fuel": {
-          "fuelAmountLevel": 93,
+          "fuelAmountLevel": 79,
           "isFuelLevelLow": false,
           "distanceToEmpty": {
-            "value": "435",
+            "value": "368",
             "unit": "km"
           },
           "fuelAmount": {
-            "value": "49.0",
+            "value": "42.0",
             "unit": "l"
           }
         },
@@ -809,7 +1232,7 @@ try {
           {
             "warning": false,
             "pressure": {
-              "value": "230.57155799999995",
+              "value": "236.06135700000002",
               "unit": "kPa"
             },
             "type": "FL",
@@ -818,25 +1241,25 @@ try {
           {
             "warning": false,
             "pressure": {
-              "value": "233.3164575",
+              "value": "247.040955",
               "unit": "kPa"
             },
             "type": "FR",
             "status": "NORMAL"
           },
           {
-            "warning": true,
+            "warning": false,
             "pressure": {
-              "value": "189.3980655",
+              "value": "222.33685949999997",
               "unit": "kPa"
             },
             "type": "RL",
-            "status": "SIGNIFICANTLY_LOW"
+            "status": "NORMAL"
           },
           {
             "warning": false,
             "pressure": {
-              "value": "211.3572615",
+              "value": "227.82665849999998",
               "unit": "kPa"
             },
             "type": "RR",
@@ -849,7 +1272,7 @@ try {
           "eventType": null,
           "batteryStatus": "0",
           "batteryVoltage": {
-            "value": "14.5",
+            "value": "14.575",
             "unit": "volts"
           },
           "batteryStateOfCharge": "null"
@@ -863,7 +1286,7 @@ try {
               },
               "name": "TripA",
               "totalDistance": {
-                "value": "10395",
+                "value": "10458",
                 "unit": "km"
               },
               "energyUsed": {
@@ -886,7 +1309,7 @@ try {
               },
               "name": "TripB",
               "totalDistance": {
-                "value": "93",
+                "value": "156",
                 "unit": "km"
               },
               "energyUsed": {
@@ -908,7 +1331,7 @@ try {
         "estRange": null,
         "distanceToService": {
           "distanceToService": {
-            "value": "1604.0",
+            "value": "1541.0",
             "unit": "km"
           }
         },
@@ -918,9 +1341,73 @@ try {
         "tpmsvehicle": true,
         "isTPMSVehicle": true,
         "HVBatSOH": null,
-        "timestamp": 1782249854955
+        "timestamp": 1782470267567
       },
-      "timestamp": 1782249854955
+      "timestamp": 1782470267567
+    }
+  },
+  "maintenance": {
+    "98867516TNKL53814": {
+      "missing": "fca",
+      "serviceHistory": [],
+      "nonfcaServiceCategoryList": [
+        {
+          "id": "1",
+          "description": "Air Conditioning"
+        },
+        {
+          "id": "2",
+          "description": "Battery"
+        },
+        {
+          "id": "3",
+          "description": "Brakes"
+        },
+        {
+          "id": "4",
+          "description": "Cooling System"
+        },
+        {
+          "id": "5",
+          "description": "Filters/Bulbs"
+        },
+        {
+          "id": "6",
+          "description": "Fuel System"
+        },
+        {
+          "id": "7",
+          "description": "Oil Change"
+        },
+        {
+          "id": "8",
+          "description": "Shocks/Struts"
+        },
+        {
+          "id": "9",
+          "description": "Suspension/Alignment"
+        },
+        {
+          "id": "10",
+          "description": "Tire Rotation"
+        },
+        {
+          "id": "11",
+          "description": "Transmission"
+        },
+        {
+          "id": "12",
+          "description": "Wheel Balance"
+        },
+        {
+          "id": "13",
+          "description": "Wiper Blades"
+        },
+        {
+          "id": "14",
+          "description": "Other"
+        }
+      ]
     }
   }
 }`);
@@ -958,6 +1445,7 @@ function fuelColor(pct) {
 function render(data) {
   const vehicle = data.vehicles[0];
   const vin     = vehicle.vin;
+  _currentVin   = vin;   // expõe para os controles remotos
   const info    = data.status[vin].vehicleInfo;
   const ts      = new Date(data.timestamp);
 
@@ -966,10 +1454,16 @@ function render(data) {
 
   // ── Hero ──
   el('hero').innerHTML = `
-    <div class="vehicle-icon">🚙</div>
-    <div>
-      <div class="vehicle-name">${vehicle.make} ${vehicle.modelDescription} ${vehicle.year}</div>
-      <div class="vehicle-sub">${vehicle.color} &nbsp;·&nbsp; VIN: ${vin}</div>
+    <div class="vehicle-hero-img-wrap">
+      <img src="/public/car.png" alt="${vehicle.make} ${vehicle.modelDescription} ${vehicle.year}" />
+    </div>
+    <div class="vehicle-hero-info">
+      <div class="vehicle-name">${vehicle.make} ${vehicle.modelDescription}</div>
+      <div class="vehicle-sub">
+        ${vehicle.year} &nbsp;·&nbsp; ${vehicle.fuelType === 'G' ? 'Gasolina' : vehicle.fuelType}<br>
+        <span style="font-family:monospace;font-size:.78rem;color:var(--muted)">${vin}</span><br>
+        <span style="color:var(--text);font-size:.82rem">${vehicle.color}</span>
+      </div>
       <span class="badge">✓ ${vehicle.regStatus.replace(/_/g,' ')}</span>
     </div>
   `;
@@ -1024,13 +1518,13 @@ function render(data) {
     const t = info.tyrePressure.find(x => x.type === pos);
     if (!t) return '';
     const psi  = (parseFloat(t.pressure.value) / 6.895).toFixed(1);
-    const kpa  = parseFloat(t.pressure.value).toFixed(1);
+    const kpa  = parseFloat(t.pressure.value).toFixed(0);
     const warn = t.warning;
     return `
       <div class="tyre-item ${warn ? 'warn' : ''}">
         <div class="tyre-label">${tyrePos(pos)}</div>
-        <div class="tyre-value">${kpa}</div>
-        <div style="font-size:.65rem;color:var(--muted)">kPa &nbsp;(${psi} psi)</div>
+        <div class="tyre-value">${psi}</div>
+        <div style="font-size:.65rem;color:var(--muted)">psi &nbsp;(${kpa} kPa)</div>
         <div class="tyre-status ${warn ? 'status-warn' : 'status-ok'}">${warn ? '⚠ '+t.status.replace(/_/g,' ') : '✓ Normal'}</div>
       </div>
     `;
@@ -1076,6 +1570,65 @@ function render(data) {
     enabledSvcs.map(s => `<span class="svc-chip svc-on">✓ ${s}</span>`).join('') +
     disabledSvcs.map(s => `<span class="svc-chip svc-off">${s}</span>`).join('');
 
+  // ── Manutenção ──
+  const maint = data.maintenance?.[vin];
+
+  // Registros
+  const history = maint?.serviceHistory || [];
+  const catMap  = {};
+  (maint?.nonfcaServiceCategoryList || []).forEach(c => { catMap[c.id] = c.description; });
+
+  const serviceIcons = {
+    'Oil Change':           '🛢',
+    'Brakes':               '🔴',
+    'Tire Rotation':        '🔄',
+    'Battery':              '🔋',
+    'Filters/Bulbs':        '💡',
+    'Air Conditioning':     '❄️',
+    'Cooling System':       '🌡️',
+    'Fuel System':          '⛽',
+    'Transmission':         '⚙️',
+    'Shocks/Struts':        '🚗',
+    'Suspension/Alignment': '🔧',
+    'Wheel Balance':        '⭕',
+    'Wiper Blades':         '🌧️',
+    'Other':                '📦',
+  };
+
+  if (history.length === 0) {
+    el('maint-history').innerHTML = `
+      <div class="maint-empty">
+        <div class="maint-empty-icon">📚</div>
+        <strong>Nenhum registro encontrado</strong>
+        <p>O histórico de manutenção da FCA está vazio.<br>Registros de oficinas externas podem ser adicionados pelo app Uconnect.</p>
+      </div>
+    `;
+  } else {
+    el('maint-history').innerHTML = history.map(r => {
+      const catName = catMap[r.serviceCategory] || r.serviceCategory || 'Serviço';
+      const icon    = serviceIcons[catName] || '🔧';
+      const date    = r.serviceDate ? new Date(r.serviceDate).toLocaleDateString('pt-BR') : '—';
+      const km      = r.odometer    ? parseInt(r.odometer).toLocaleString('pt-BR') + ' km' : '';
+      const dealer  = r.dealerName  ? `<br>${r.dealerName}` : '';
+      return `
+        <div class="maint-record">
+          <div class="maint-icon">${icon}</div>
+          <div class="maint-info">
+            <div class="maint-desc">${catName}</div>
+            <div class="maint-meta">${date}${dealer}</div>
+            ${r.notes ? `<div class="maint-meta" style="color:var(--text)">${r.notes}</div>` : ''}
+          </div>
+          ${km ? `<div class="maint-km">${km}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Categorias disponíveis
+  el('maint-categories').innerHTML = (maint?.nonfcaServiceCategoryList || []).map(c =>
+    `<div class="cat-item">${c.description}</div>`
+  ).join('');
+
   // Mostrar
   el('loading').style.display = 'none';
   el('error-box').style.display = 'none';
@@ -1083,51 +1636,420 @@ function render(data) {
 }
 
 // ─── LOAD DATA ───────────────────────────────────────────────────────────────
+let isFirstLoad = true;
+
 async function loadData() {
-  el('loading').style.display = 'flex';
-  el('error-box').style.display = 'none';
-  el('main').style.display = 'none';
+  const isRefresh = !isFirstLoad;
+
+  // Na primeira carga mostra o spinner de tela cheia
+  // Nos refreshes mantém o dashboard visível e só desabilita o botão
+  if (!isRefresh) {
+    el('loading').style.display = 'flex';
+    el('error-box').style.display = 'none';
+    el('main').style.display = 'none';
+  }
+
   el('btn-refresh').disabled = true;
+  el('btn-refresh').textContent = '⏳ Buscando dados...';
+  el('refresh-status').textContent = '';
 
   try {
     let data;
 
     if (API_ENDPOINT) {
-      // Modo servidor — chama endpoint REST
-      const res = await fetch(API_ENDPOINT);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const res = await fetch(API_ENDPOINT, { headers: apiHeaders() });
+      if (!res.ok) throw new Error(`Erro na API: HTTP ${res.status}`);
       data = await res.json();
+      if (data.error) throw new Error(data.error + (data.detail ? '\n' + JSON.stringify(data.detail) : ''));
 
     } else if (JSON_FILE) {
-      // Modo local — carrega arquivo JSON (precisa de servidor HTTP, não funciona em file://)
       const res = await fetch(JSON_FILE);
       if (!res.ok) throw new Error(`Arquivo "${JSON_FILE}" não encontrado.`);
       data = await res.json();
 
     } else if (EMBEDDED_DATA) {
-      // Modo embutido — dados injetados diretamente no HTML
       data = EMBEDDED_DATA;
 
     } else {
       throw new Error(
         'Nenhuma fonte de dados configurada.\n\n' +
-        'Opções:\n' +
-        '1. Execute: node inject-dashboard.js   (recomendado)\n' +
-        '2. Configure JSON_FILE com o nome do arquivo JSON gerado\n' +
-        '3. Configure API_ENDPOINT com um servidor HTTP'
+        'Execute: node server.js\ne abra http://localhost:3000'
       );
     }
 
     render(data);
+    isFirstLoad = false;
+    el('refresh-status').textContent = `✓ Atualizado às ${new Date().toLocaleTimeString('pt-BR')}`;
 
   } catch (err) {
-    el('loading').style.display = 'none';
-    el('error-box').style.display = 'flex';
-    el('error-msg').textContent = err.message;
+    if (!isRefresh) {
+      el('loading').style.display = 'none';
+      el('error-box').style.display = 'flex';
+      el('error-msg').textContent = err.message;
+    } else {
+      el('refresh-status').textContent = `⚠ Erro: ${err.message.split('\n')[0]}`;
+      el('refresh-status').style.color = 'var(--danger)';
+    }
   } finally {
     el('btn-refresh').disabled = false;
+    el('btn-refresh').textContent = '🔄 Atualizar dados';
   }
 }
+
+// ─── CONTROLE REMOTO ─────────────────────────────────────────────────────────
+
+// VIN do veículo principal (preenchido após render)
+let _currentVin = null;
+
+// Mapeamento botão → comando
+const REMOTE_COMMANDS = [
+  { id: 'btn-engine-on',    command: 'REON',  apiVersion: 'v1', cmdUrl: 'remote', label: '🔑 Ligar Motor' },
+  { id: 'btn-engine-off',   command: 'REOFF', apiVersion: 'v1', cmdUrl: 'remote', label: '⏹ Desligar Motor' },
+  { id: 'btn-lights',       command: 'ROLIGHTS', apiVersion: 'v1', cmdUrl: 'remote', label: '💡 Só Luzes' },
+  { id: 'btn-trunk-unlock', command: 'ROTRUNKUNLOCK', apiVersion: 'v2', cmdUrl: 'remote', label: '📦 Abrir Porta-Malas' },
+  { id: 'btn-trunk-lock',   command: 'ROTRUNKLOCK',   apiVersion: 'v2', cmdUrl: 'remote', label: '📦🔐 Fechar Porta-Malas' },
+  { id: 'btn-precond-on',   command: 'ROPRECOND',     apiVersion: 'v1', cmdUrl: 'remote', label: '❄️ Pré-climatizar' },
+  { id: 'btn-precond-off',  command: 'ROPRECOND_OFF', apiVersion: 'v1', cmdUrl: 'remote', label: '❄️ Parar Clim.' },
+  { id: 'btn-doors-unlock', command: 'RDU',   apiVersion: 'v1', cmdUrl: 'remote', label: '🔓 Destrancar' },
+  { id: 'btn-doors-lock',   command: 'RDL',   apiVersion: 'v1', cmdUrl: 'remote', label: '🔐 Trancar' },
+  { id: 'btn-horn',         command: 'HBLF',  apiVersion: 'v1', cmdUrl: 'remote', label: '📯 Buzina + Luzes' },
+];
+
+// O btn-gps-update é tratado separadamente (não é um comando padrão)
+document.addEventListener('DOMContentLoaded', () => {
+  const gpsBtn = document.getElementById('btn-gps-update');
+  if (gpsBtn) gpsBtn.addEventListener('click', handleGpsUpdate);
+});
+
+// ─── GPS Update ───────────────────────────────────────────────────────────────
+async function handleGpsUpdate() {
+  const pin = document.getElementById('pin-input').value.trim();
+  if (!pin) { setCmdStatus('⚠ Informe o PIN primeiro', 'fail'); return; }
+  if (!_currentVin) { setCmdStatus('⚠ Carregue os dados primeiro', 'fail'); return; }
+  const btn = document.getElementById('btn-gps-update');
+  btn.disabled = true;
+  setCmdStatus('📡 Solicitando atualização de GPS...');
+  try {
+    const res = await fetch('/api/location/update', {
+      method: 'POST',
+      headers: apiHeaders(),
+      body: JSON.stringify({ vin: _currentVin, pin }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    setCmdStatus('📡 GPS atualizado! Recarregando localização em 10s...', 'ok');
+    setTimeout(() => loadLocationStatus(), 10000);
+  } catch (err) {
+    setCmdStatus(`❌ ${err.message}`, 'fail');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ─── Portas & Janelas ─────────────────────────────────────────────────────────
+async function loadDoorsStatus() {
+  if (!_currentVin) return;
+  const el = document.getElementById('doors-status');
+  el.innerHTML = '<span class="muted">Carregando...</span>';
+  try {
+    const res  = await fetch(`/api/doors?vin=${encodeURIComponent(_currentVin)}`, { headers: apiHeaders() });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    const doors   = data.doors   || {};
+    const windows = data.windows || {};
+    const engine  = data.engine  || {};
+    const trunk   = data.trunk   || {};
+
+    function statusIcon(val, lockedVal = 'LOCKED') {
+      if (val === undefined || val === null) return '<span class="muted">—</span>';
+      const isLocked = (String(val).toUpperCase() === lockedVal.toUpperCase());
+      return isLocked
+        ? `<span class="status-locked">🔒 ${val}</span>`
+        : `<span class="status-unlocked">🔓 ${val}</span>`;
+    }
+    function closedIcon(val) {
+      if (val === undefined || val === null) return '<span class="muted">—</span>';
+      const isClosed = (String(val).toUpperCase() === 'CLOSED');
+      return isClosed
+        ? `<span class="status-closed">✅ ${val}</span>`
+        : `<span class="status-open">⚠️ ${val}</span>`;
+    }
+
+    const rows = [
+      ['🚗 Motor',          statusIcon(engine.status, 'ON')],
+      ['🪟 Porta-motorista',statusIcon(doors?.driver?.status)],
+      ['🪟 Porta-passageiro',statusIcon(doors?.passenger?.status)],
+      ['🪟 Traseira esq.',  statusIcon(doors?.leftRear?.status)],
+      ['🪟 Traseira dir.',  statusIcon(doors?.rightRear?.status)],
+      ['📦 Porta-malas',    statusIcon(trunk.status)],
+      ['💨 Janela mot.',    closedIcon(windows?.driver?.status)],
+      ['💨 Janela pass.',   closedIcon(windows?.passenger?.status)],
+    ];
+
+    el.innerHTML = rows.map(([label, value]) =>
+      `<div class="door-row"><span><span class="door-icon"></span>${label}</span><span>${value}</span></div>`
+    ).join('');
+
+    // Timestamp
+    if (data.timestamp) {
+      const ts = new Date(data.timestamp).toLocaleString('pt-BR');
+      el.innerHTML += `<div style="margin-top:.6rem;font-size:.75rem;color:var(--muted)">⏱ ${ts}</div>`;
+    }
+  } catch (err) {
+    el.innerHTML = `<span class="muted">Erro: ${err.message}</span>`;
+  }
+}
+
+// ─── Localização GPS ──────────────────────────────────────────────────────────
+async function loadLocationStatus() {
+  if (!_currentVin) return;
+  const el = document.getElementById('location-status');
+  el.innerHTML = '<span class="muted">Carregando...</span>';
+  try {
+    const res  = await fetch(`/api/location?vin=${encodeURIComponent(_currentVin)}`, { headers: apiHeaders() });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    const lat = data.latitude  || data.positionLatitude;
+    const lon = data.longitude || data.positionLongitude;
+    const alt = data.altitude  || data.positionAltitude;
+    const ts  = data.timeStamp ? new Date(data.timeStamp).toLocaleString('pt-BR') : '—';
+    const approx = data.isLocationApprox ? ' (aprox.)' : '';
+
+    if (!lat || !lon) {
+      el.innerHTML = '<span class="muted">Localização não disponível</span>';
+      return;
+    }
+
+    const mapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+    el.innerHTML = `
+      <div class="door-row"><span>📍 Latitude</span><span>${lat.toFixed(6)}</span></div>
+      <div class="door-row"><span>📍 Longitude</span><span>${lon.toFixed(6)}</span></div>
+      ${alt ? `<div class="door-row"><span>⛰️ Altitude</span><span>${alt} m</span></div>` : ''}
+      <div class="door-row"><span>🕐 Atualizado</span><span>${ts}${approx}</span></div>
+      <a class="map-link" href="${mapsUrl}" target="_blank">🗺️ Abrir no Google Maps</a>
+    `;
+  } catch (err) {
+    el.innerHTML = `<span class="muted">Erro: ${err.message}</span>`;
+  }
+}
+
+// ─── Última Viagem ────────────────────────────────────────────────────────────
+async function loadLastTrip() {
+  if (!_currentVin) return;
+  const el    = document.getElementById('lasttrip-data');
+  const elEco = document.getElementById('ecoscore-data');
+  el.innerHTML = '<span class="muted">Carregando...</span>';
+  try {
+    const res  = await fetch(`/api/lasttrip?vin=${encodeURIComponent(_currentVin)}`, { headers: apiHeaders() });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    // A estrutura pode variar — tenta extrair campos comuns
+    const trip = data.trip || data.lastTrip || data;
+    const rows = [];
+
+    function addRow(label, value, unit = '') {
+      if (value !== undefined && value !== null) rows.push([label, `${value}${unit}`]);
+    }
+
+    addRow('📏 Distância',   trip.distance?.value || trip.distanceDriven, ' km');
+    addRow('⏱ Duração',      trip.duration?.value || trip.tripDuration, ' min');
+    addRow('⛽ Consumo',      trip.fuelConsumption?.value || trip.averageFuelConsumption, ' L/100km');
+    addRow('🌿 Eco Score',    trip.ecoScore || trip.globalScore);
+    addRow('🚀 Vel. máx.',   trip.maxSpeed?.value || trip.maxSpeed, ' km/h');
+    addRow('📊 Vel. média',  trip.averageSpeed?.value || trip.averageSpeed, ' km/h');
+    addRow('📅 Data início', trip.startDate || trip.startTime);
+    addRow('📅 Data fim',    trip.endDate   || trip.endTime);
+
+    if (rows.length === 0) {
+      el.innerHTML = `<details><summary class="muted" style="cursor:pointer">Ver dados brutos</summary><pre style="font-size:.7rem;overflow:auto;max-height:200px">${JSON.stringify(data, null, 2)}</pre></details>`;
+    } else {
+      el.innerHTML = rows.map(([l,v]) =>
+        `<div class="trip-row"><span>${l}</span><span>${v}</span></div>`
+      ).join('');
+    }
+
+    // Eco score separado
+    const eco = trip.ecoScore || trip.globalScore;
+    if (eco !== undefined) {
+      const pct = Math.round(eco);
+      const color = pct >= 70 ? '#34d399' : pct >= 40 ? '#fbbf24' : '#f87171';
+      elEco.innerHTML = `
+        <div style="text-align:center;padding:1rem">
+          <div style="font-size:3rem;font-weight:700;color:${color}">${pct}</div>
+          <div style="color:var(--muted);font-size:.85rem">/ 100</div>
+          <div style="margin-top:.5rem;height:8px;background:var(--border);border-radius:4px">
+            <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width .5s"></div>
+          </div>
+        </div>`;
+    } else {
+      elEco.innerHTML = '<span class="muted">Eco score não disponível para este veículo</span>';
+    }
+  } catch (err) {
+    el.innerHTML = `<span class="muted">Erro: ${err.message}</span>`;
+    elEco.innerHTML = '';
+  }
+}
+
+function setCmdStatus(msg, cls = '') {
+  const el = document.getElementById('cmd-status');
+  el.textContent = msg;
+  el.className = 'cmd-status ' + cls;
+}
+
+function setRemoteButtonsDisabled(disabled) {
+  REMOTE_COMMANDS.forEach(c => {
+    const btn = document.getElementById(c.id);
+    if (btn) btn.disabled = disabled;
+  });
+}
+
+// Token de cancelamento global — substitui o anterior a cada novo comando
+let _pollCancelToken = null;
+
+async function pollCommandStatus(vin, correlationId) {
+  // Polling robusto: até 5 min (75 × 4s)
+  // A cada tentativa usa DOIS mecanismos, igual à lib Python:
+  //   1. endpoint direto /remote/{id}/status/  (pode retornar 404 na região BR — normal)
+  //   2. fallback via /notifications           (busca o correlationId nas notificações)
+  // Cancelável: se um novo comando for enviado, o polling anterior para.
+  const token  = Symbol(correlationId);
+  _pollCancelToken = token;
+
+  const MAX    = 75;   // 75 × 4s = 5 min
+  const DELAY  = 4000;
+  const SUCCESS = new Set(['success', 'succeeded', 'completed', 'complete']);
+  const FAILURE = new Set(['failure', 'failed', 'error', 'rejected']);
+
+  for (let i = 0; i < MAX; i++) {
+    await new Promise(r => setTimeout(r, DELAY));
+
+    // Cancelado por novo comando → para silenciosamente
+    if (_pollCancelToken !== token) return false;
+
+    setCmdStatus(`📡 Aguardando confirmação do veículo... (${i + 1}/${MAX})`);
+
+    // ── 1. Endpoint direto ────────────────────────────────────────────────
+    try {
+      const res  = await fetch(`/api/command/status?vin=${encodeURIComponent(vin)}&correlationId=${encodeURIComponent(correlationId)}`, { headers: apiHeaders() });
+      const data = await res.json();
+      const st   = (data.status || data.responseStatus || '').toLowerCase();
+      if (SUCCESS.has(st)) return true;
+      if (FAILURE.has(st)) throw new Error(`Comando rejeitado pelo veículo: ${st}`);
+      // 'pending' → continua para o fallback
+    } catch (err) {
+      if (err.message && err.message.startsWith('Comando rejeitado')) throw err;
+    }
+
+    if (_pollCancelToken !== token) return false;
+
+    // ── 2. Fallback via notificações ──────────────────────────────────────
+    try {
+      const res  = await fetch(`/api/command/notifications?vin=${encodeURIComponent(vin)}&correlationId=${encodeURIComponent(correlationId)}`, { headers: apiHeaders() });
+      const data = await res.json();
+      if (data.notifStatus === 'success') return true;
+      if (data.notifStatus === 'failure') throw new Error('Comando falhou conforme notificação do veículo');
+    } catch (err) {
+      if (err.message && (err.message.includes('falhou') || err.message.includes('rejeitado'))) throw err;
+    }
+  }
+
+  throw new Error(`Sem resposta após ${MAX * DELAY / 1000}s. O comando foi enviado com sucesso ao servidor Jeep, mas o veículo não confirmou — pode estar fora de cobertura de rede ou desligado. O comando será executado quando o carro reconectar.`);
+}
+
+async function sendRemoteCommand(cmdDef) {
+  const pin = document.getElementById('pin-input').value.trim();
+  if (!pin) {
+    setCmdStatus('⚠ Informe seu PIN primeiro', 'fail');
+    document.getElementById('pin-input').focus();
+    return;
+  }
+  if (!_currentVin) {
+    setCmdStatus('⚠ Carregue os dados do veículo primeiro', 'fail');
+    return;
+  }
+
+  const btn = document.getElementById(cmdDef.id);
+  const origLabel = btn.textContent;
+  btn.classList.add('loading');
+  btn.textContent = '';
+  setRemoteButtonsDisabled(true);
+  setCmdStatus(`⏳ Enviando comando "${cmdDef.command}"...`);
+
+  let correlationId = null;
+
+  try {
+    const res = await fetch('/api/command', {
+      method:  'POST',
+      headers: apiHeaders(),
+      body:    JSON.stringify({
+        vin:        _currentVin,
+        pin,
+        command:    cmdDef.command,
+        apiVersion: cmdDef.apiVersion,
+        cmdUrl:     cmdDef.cmdUrl,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      const msg = data.error || `HTTP ${res.status}`;
+      if (res.status === 403 || (msg && msg.toLowerCase().includes('pin'))) {
+        throw new Error('PIN incorreto. Verifique o PIN do app Uconnect.');
+      }
+      throw new Error(msg);
+    }
+
+    correlationId = data.correlationId;
+
+    // ── Confirmação imediata: o comando chegou ao servidor Jeep ──────────────
+    // Libera os botões e informa o usuário — o polling continua em background
+    btn.classList.remove('loading');
+    btn.textContent = origLabel;
+    setRemoteButtonsDisabled(false);
+    setCmdStatus(`📡 Comando enviado ao servidor Jeep! Aguardando confirmação do veículo...`);
+
+    // ── Polling em background — não bloqueia a UI ────────────────────────────
+    pollCommandStatus(_currentVin, correlationId)
+      .then(() => {
+        setCmdStatus(`✅ ${cmdDef.label} — confirmado pelo veículo!`, 'ok');
+        if (['REON', 'REOFF'].includes(cmdDef.command)) {
+          setTimeout(() => loadData(true), 4000);
+        }
+      })
+      .catch(err => {
+        // Timeout não é erro — o carro pode estar sem rede
+        const isTimeout = err.message.includes('Sem resposta');
+        if (isTimeout) {
+          setCmdStatus(
+            `📬 Comando enviado e aguardando veículo. Se o carro estiver sem rede, será executado quando reconectar.`,
+            'ok'
+          );
+        } else {
+          setCmdStatus(`❌ ${err.message}`, 'fail');
+        }
+      });
+
+    // Retorna imediatamente — o polling continua por conta própria
+    return;
+
+  } catch (err) {
+    // Erro real: PIN errado, rede, etc.
+    btn.classList.remove('loading');
+    btn.textContent = origLabel;
+    setRemoteButtonsDisabled(false);
+    setCmdStatus(`❌ ${err.message}`, 'fail');
+  }
+}
+
+// Registra eventos dos botões de controle
+REMOTE_COMMANDS.forEach(cmd => {
+  const btn = document.getElementById(cmd.id);
+  if (btn) btn.addEventListener('click', () => sendRemoteCommand(cmd));
+});
 
 // ─── EVENTS ──────────────────────────────────────────────────────────────────
 el('btn-refresh').addEventListener('click', loadData);

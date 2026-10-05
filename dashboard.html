@@ -9,96 +9,167 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --accent:      #e63312;
-      --accent-glow: rgba(230, 51, 18, 0.30);
-      --ok:          #30d158;
-      --warn:        #ff9f0a;
-      --danger:      #ff453a;
-      --blue:        #0a84ff;
-      --purple:      #bf5af2;
-      --text:        #f5f5f7;
-      --muted:       rgba(235,235,245,0.52);
-      --muted2:      rgba(235,235,245,0.28);
-      --border:      rgba(255,255,255,0.10);
-      --border-hi:   rgba(255,255,255,0.18);
-      --radius:      20px;
-      --radius-sm:   13px;
-      --radius-pill: 9999px;
-      --font:        'Inter', -apple-system, 'SF Pro Display', system-ui, sans-serif;
-      /* glass recipe */
-      --glass-bg:    rgba(255,255,255,0.07);
-      --glass-blur:  blur(28px) saturate(2);
-      --glass-blur-sm: blur(16px) saturate(1.8);
+      --primary:       #0066cc;
+      --primary-focus: #0071e3;
+      --ok:            #34C759;
+      --warn:          #FF9F0A;
+      --danger:        #FF3B30;
+      --blue:          #0066cc;
+      --purple:        #af52de;
+      --text:          #1d1d1f;
+      --muted:         #86868b;
+      --muted2:        rgba(0, 0, 0, 0.3);
+      --border:        rgba(0, 0, 0, 0.08);
+      --border-hi:     rgba(0, 0, 0, 0.12);
+      --radius:        22px;
+      --radius-sm:     10px;
+      --radius-pill:   9999px;
+      --font:          'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+      --canvas:        rgba(255, 255, 255, 0.45);
+      --canvas-solid:  #ffffff;
+      --canvas-bg:     #f5f5f7;
+      --glass-border-top: rgba(255, 255, 255, 0.7);
+      --glass-border-bot: rgba(0, 0, 0, 0.05);
+      --glass-shadow:  0 2px 20px rgba(0,0,0,0.06);
+      --glass-blur:    blur(40px) saturate(1.8);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
 
-    /* ── Animated mesh background ── */
     body {
-      background-color: #080010;
+      background:
+        radial-gradient(at 20% 20%, rgba(120, 180, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(at 80% 30%, rgba(200, 150, 255, 0.12) 0%, transparent 50%),
+        radial-gradient(at 50% 80%, rgba(255, 180, 200, 0.10) 0%, transparent 50%),
+        radial-gradient(at 10% 70%, rgba(100, 220, 200, 0.08) 0%, transparent 50%),
+        #f5f5f7;
+      background-attachment: fixed;
       color: var(--text);
       font-family: var(--font);
+      font-size: 17px;
+      font-weight: 400;
+      line-height: 1.47;
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       overflow-x: hidden;
     }
 
-    /* Fixed orb layer behind everything */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      background:
-        radial-gradient(ellipse 70% 55% at 15% 10%,  rgba(230,51,18,0.32)  0%, transparent 65%),
-        radial-gradient(ellipse 55% 50% at 85% 20%,  rgba(99,0,210,0.22)   0%, transparent 60%),
-        radial-gradient(ellipse 60% 45% at 50% 90%,  rgba(10,132,255,0.18) 0%, transparent 65%),
-        radial-gradient(ellipse 40% 35% at 10% 80%,  rgba(191,90,242,0.14) 0%, transparent 55%),
-        radial-gradient(ellipse 50% 40% at 90% 75%,  rgba(48,209,88,0.10)  0%, transparent 60%);
-      pointer-events: none;
-    }
-
-    /* Subtle noise texture overlay for depth */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-    }
-
-    /* All content must sit above the orb layer */
+    /* Ensure content above background */
     header, #loading, #error-box, main { position: relative; z-index: 1; }
 
-    /* ── Header — frosted glass pill bar ── */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 200;
-      background: rgba(8,0,16,0.55);
-      -webkit-backdrop-filter: var(--glass-blur);
-      backdrop-filter: var(--glass-blur);
-      border-bottom: 1px solid var(--border);
-      /* top specular edge */
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
-      padding: 12px 28px;
+    /* ── Global Nav (Black Bar - 44px) ── */
+    .global-nav {
+      height: 44px;
+      background: #000000;
+      color: #ffffff;
+      font-size: 12px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 201;
+      border-bottom: 1px solid #1a1a1a;
     }
-    .header-icon {
-      width: 34px; height: 34px;
-      background: var(--accent);
-      border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.15) inset, 0 4px 16px var(--accent-glow);
+    .global-nav-container {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    header h1  { font-size: 1rem; font-weight: 600; letter-spacing: -0.3px; }
-    header p   { font-size: .72rem; color: var(--muted); margin-top: 1px; }
-    #last-update { margin-left: auto; font-size: .7rem; color: var(--muted); text-align: right; line-height: 1.5; }
+    .global-nav-logo {
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .global-nav-logo svg { opacity: 0.9; }
+    .global-nav-links {
+      display: flex;
+      gap: 24px;
+    }
+    .global-nav-links span {
+      color: #86868b;
+      cursor: pointer;
+      transition: color 0.2s;
+      font-weight: 400;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .global-nav-links span:hover, .global-nav-links span.active {
+      color: #ffffff;
+    }
+    .nav-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: #86868b;
+    }
+    .nav-dot {
+      width: 5px;
+      height: 5px;
+      background: #30d158;
+      border-radius: 50%;
+      animation: dot-pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes dot-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── Sub Nav (Frosted Glass) ── */
+    .sub-nav-frosted {
+      height: 52px;
+      background: rgba(245, 245, 247, 0.72);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      position: sticky;
+      top: 44px;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+    }
+    .sub-nav-container {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sub-nav-title {
+      font-size: 21px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #1d1d1f;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sub-nav-model-year {
+      font-weight: 400;
+      font-size: 14px;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+    #last-update {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: right;
+      line-height: 1.35;
+    }
+    #last-update strong {
+      color: var(--text);
+    }
 
     /* ── Loading / Error ── */
     #loading, #error-box {
@@ -110,218 +181,200 @@
       gap: 16px;
     }
     .spinner {
-      width: 36px; height: 36px;
-      border: 2.5px solid rgba(255,255,255,.10);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin .75s linear infinite;
+      width: 40px; height: 40px;
+      display: inline-block;
+    }
+    .spinner svg {
+      animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    #loading p { font-size: .85rem; color: var(--muted); }
+    #loading p { font-size: .88rem; color: var(--muted); }
     #error-box { color: var(--danger); }
     #error-box pre {
-      background: rgba(255,69,58,.08);
-      border: 1px solid rgba(255,69,58,.20);
+      background: rgba(255,59,48,.04);
+      border: 1px solid rgba(255,59,48,.15);
       padding: 16px; border-radius: var(--radius-sm);
       font-size: .8rem; max-width: 560px; overflow: auto;
+      color: var(--text);
     }
 
-    /* ── Main grid ── */
-    main { max-width: 1060px; margin: 0 auto; padding: 24px 20px 72px; display: none; }
+    /* ── Main ── */
+    main { max-width: 1080px; margin: 0 auto; padding: 24px 20px 72px; display: none; }
 
-    /* ── Glass mixin (applied via class) ── */
-    .glass {
-      background: var(--glass-bg);
+    /* ── Liquid Glass Card ── */
+    .card {
+      background: var(--canvas);
       -webkit-backdrop-filter: var(--glass-blur);
       backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--border-hi);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.14),   /* top specular */
-        inset 0 -1px 0 rgba(0,0,0,0.20),         /* bottom shadow */
-        0 8px 32px rgba(0,0,0,0.35);             /* outer depth */
-    }
-    .glass-sm {
-      background: rgba(255,255,255,0.05);
-      -webkit-backdrop-filter: var(--glass-blur-sm);
-      backdrop-filter: var(--glass-blur-sm);
-      border: 1px solid var(--border);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 4px 16px rgba(0,0,0,0.25);
-    }
-
-    /* ── Vehicle hero ── */
-    .vehicle-hero {
-      background: rgba(255,255,255,0.06);
-      -webkit-backdrop-filter: var(--glass-blur);
-      backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--border-hi);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.16),
-        inset 0 -1px 0 rgba(0,0,0,0.20),
-        0 12px 48px rgba(0,0,0,0.45);
       border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      border-top: 1px solid var(--glass-border-top);
+      border-bottom: 1px solid var(--glass-border-bot);
+      border-left: 1px solid rgba(255,255,255,0.4);
+      border-right: 1px solid rgba(255,255,255,0.4);
+      box-shadow: var(--glass-shadow);
+      transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    @media (hover: hover) {
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 30px rgba(0,0,0,0.09);
+      }
+    }
+    .card-title {
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+    .card-title-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-title-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ── Vehicle Hero ── */
+    .vehicle-hero {
+      background: var(--canvas);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border-top: 1px solid var(--glass-border-top);
+      border-bottom: 1px solid var(--glass-border-bot);
+      border-left: 1px solid rgba(255,255,255,0.4);
+      border-right: 1px solid rgba(255,255,255,0.4);
+      border-radius: var(--radius);
+      box-shadow: var(--glass-shadow);
       overflow: hidden;
       display: flex;
       align-items: stretch;
       margin-bottom: 24px;
-      min-height: 210px;
-      position: relative;
+      min-height: 220px;
     }
     .vehicle-hero-img-wrap {
-      flex: 1 1 58%;
+      flex: 1 1 60%;
       position: relative;
       overflow: hidden;
       min-height: 180px;
-      background:
-        radial-gradient(ellipse 90% 70% at 50% 85%, rgba(230,51,18,.10) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,255,255,.02) 0%, transparent 70%);
+      background: radial-gradient(circle at center, rgba(255,255,255,0.6) 0%, rgba(245,245,247,0.3) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .vehicle-hero-img-wrap img {
-      width: 100%; height: 100%;
+      max-width: 85%;
+      max-height: 160px;
       object-fit: contain;
-      object-position: center 85%;
-      padding: 24px 16px 0;
-      filter: drop-shadow(0 16px 40px rgba(0,0,0,.80));
+      padding: 16px;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,.12));
       display: block;
     }
-    /* reflection under car */
-    .vehicle-hero-img-wrap::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 5%; right: 5%; height: 30px;
-      background: radial-gradient(ellipse at center, rgba(255,255,255,.07) 0%, transparent 70%);
-      pointer-events: none;
-    }
     .vehicle-hero-info {
-      flex: 0 0 auto;
-      width: 265px;
-      padding: 28px 22px;
+      flex: 0 0 280px;
+      padding: 28px 24px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      border-left: 1px solid var(--border);
+      border-left: 1px solid rgba(0,0,0,0.06);
     }
     .vehicle-name {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
       line-height: 1.15;
+      color: var(--text);
     }
-    .vehicle-sub  { color: var(--muted); font-size: .8rem; margin-top: 8px; line-height: 1.65; }
+    .vehicle-sub  { color: var(--muted); font-size: .88rem; margin-top: 8px; line-height: 1.6; }
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 4px 11px;
+      padding: 4px 12px;
       border-radius: var(--radius-pill);
-      font-size: .68rem;
-      font-weight: 500;
-      letter-spacing: .1px;
-      background: rgba(48,209,88,.10);
-      color: var(--ok);
-      border: 1px solid rgba(48,209,88,.20);
+      font-size: .72rem;
+      font-weight: 600;
+      background: rgba(52,199,89,.10);
+      color: #24b23e;
+      border: 1px solid rgba(52,199,89,.2);
       margin-top: 14px;
       width: fit-content;
     }
+    .badge svg { width: 12px; height: 12px; }
+
     @media (max-width: 640px) {
       .vehicle-hero { flex-direction: column; }
-      .vehicle-hero-info { width: 100%; border-left: none; border-top: 1px solid var(--border); padding: 18px 20px; }
+      .vehicle-hero-info { width: 100%; border-left: none; border-top: 1px solid rgba(0,0,0,0.06); padding: 20px; flex: unset; }
     }
 
-    /* ── Grid cards ── */
-    .grid { display: grid; gap: 14px; }
-    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); }
+    /* ── Grid ── */
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 
-    /* ── Glass card ── */
-    .card {
-      background: rgba(255,255,255,0.07);
-      -webkit-backdrop-filter: var(--glass-blur-sm);
-      backdrop-filter: var(--glass-blur-sm);
-      border-radius: var(--radius);
-      padding: 20px;
-      position: relative;
-      overflow: hidden;
-      /* layered border: bright top, dark bottom */
-      border: 1px solid transparent;
-      background-clip: padding-box;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.15),
-        inset 0 -1px 0 rgba(0,0,0,0.18),
-        inset 1px 0 0 rgba(255,255,255,0.07),
-        inset -1px 0 0 rgba(255,255,255,0.04),
-        0 6px 24px rgba(0,0,0,0.30);
-    }
-    /* diagonal specular sheen */
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 40%;
-      background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
-      pointer-events: none;
-    }
-    .card-title {
-      font-size: .66rem;
+    /* ── Stat Values ── */
+    .stat-value {
+      font-size: 38px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.9px;
-      color: var(--muted);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--text);
     }
-
-    /* ── Stat ── */
-    .stat-value { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.8px; line-height: 1; }
     .stat-unit  { font-size: .8rem; color: var(--muted); margin-top: 6px; }
 
-    /* ── Progress bar ── */
+    /* ── Progress Bar ── */
     .progress-wrap {
-      background: rgba(255,255,255,.06);
+      background: rgba(0,0,0,.05);
       border-radius: var(--radius-pill);
-      height: 5px;
+      height: 6px;
       overflow: hidden;
       margin-top: 14px;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,.3);
     }
     .progress-bar {
       height: 100%;
       border-radius: var(--radius-pill);
       transition: width .8s cubic-bezier(.4,0,.2,1);
-      position: relative;
     }
-    .bar-ok     { background: linear-gradient(90deg, #28c244, #30d158); box-shadow: 0 0 8px rgba(48,209,88,.4); }
-    .bar-warn   { background: linear-gradient(90deg, #e08800, #ff9f0a); box-shadow: 0 0 8px rgba(255,159,10,.4); }
-    .bar-danger { background: linear-gradient(90deg, #d03030, #ff453a); box-shadow: 0 0 8px rgba(255,69,58,.4); }
+    .bar-ok     { background: var(--ok); }
+    .bar-warn   { background: var(--warn); }
+    .bar-danger { background: var(--danger); }
 
-    /* ── Tyre grid ── */
+    /* ── Tyre Pressure ── */
     .tyre-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 9px;
+      gap: 10px;
     }
     .tyre-item {
-      background: rgba(255,255,255,.05);
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.5);
       border-radius: var(--radius-sm);
-      padding: 13px 8px;
+      padding: 14px 10px;
       text-align: center;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 2px 8px rgba(0,0,0,.2);
-      border: 1px solid rgba(255,255,255,.08);
-      transition: box-shadow .2s;
+      border: 1px solid rgba(255,255,255,0.6);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
     }
     .tyre-item.warn {
-      border-color: rgba(255,69,58,.35);
-      background: rgba(255,69,58,.08);
-      box-shadow: inset 0 1px 0 rgba(255,100,80,.15), 0 2px 8px rgba(0,0,0,.2), 0 0 12px rgba(255,69,58,.15);
+      border-color: rgba(255,59,48,.3);
+      background: rgba(255,59,48,.04);
     }
-    .tyre-label  { font-size: .65rem; color: var(--muted); font-weight: 500; letter-spacing: .4px; }
-    .tyre-value  { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.4px; margin: 5px 0 2px; }
-    .tyre-status { font-size: .61rem; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
-    .status-ok   { color: var(--ok); }
-    .status-warn { color: var(--danger); }
+    .tyre-label  { font-size: .65rem; color: var(--muted); font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+    .tyre-value  { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin: 4px 0 2px; color: var(--text); }
+    .tyre-status { font-size: .62rem; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
 
     /* ── Battery ── */
     .battery-wrap {
@@ -332,27 +385,27 @@
     }
     .battery-body {
       flex: 1;
-      height: 24px;
-      background: rgba(255,255,255,.07);
-      border-radius: 6px;
-      border: 1.5px solid rgba(255,255,255,.15);
+      height: 20px;
+      background: rgba(0,0,0,.04);
+      border-radius: 4px;
+      border: 1.5px solid rgba(0,0,0,.15);
       position: relative;
       overflow: visible;
     }
     .battery-body::after {
       content: '';
       position: absolute;
-      right: -7px;
+      right: -6px;
       top: 50%;
       transform: translateY(-50%);
-      width: 5px;
-      height: 12px;
-      background: rgba(255,255,255,.2);
-      border-radius: 0 3px 3px 0;
+      width: 4px;
+      height: 10px;
+      background: rgba(0,0,0,.2);
+      border-radius: 0 2px 2px 0;
     }
     .battery-fill {
       height: 100%;
-      border-radius: 4px;
+      border-radius: 2px;
       background: var(--ok);
     }
     .battery-text {
@@ -366,78 +419,103 @@
       align-items: center;
       justify-content: space-between;
       padding: 11px 0;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      font-size: .86rem;
     }
     .trip-row:last-child { border-bottom: none; }
-    .trip-name { font-weight: 600; font-size: .9rem; letter-spacing: -0.1px; }
-    .trip-dist { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.2px; color: var(--text); }
+    .trip-name { font-weight: 600; font-size: .9rem; color: var(--text); }
+    .trip-dist { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
     .trip-eff  { font-size: .75rem; color: var(--muted); margin-top: 2px; }
 
-    /* ── Info table ── */
+    /* ── Info Tables ── */
     .info-table { width: 100%; border-collapse: collapse; }
-    .info-table tr { border-bottom: 1px solid var(--border); }
+    .info-table tr { border-bottom: 1px solid rgba(0,0,0,0.05); }
     .info-table tr:last-child { border-bottom: none; }
-    .info-table td { padding: 10px 4px; font-size: .86rem; }
+    .info-table td { padding: 11px 6px; font-size: .88rem; color: var(--text); }
     .info-table td:first-child { color: var(--muted); width: 45%; }
     .info-table td:last-child  { font-weight: 500; }
 
-    /* ── Services ── */
+    /* ── Service Chips ── */
     .services-wrap { display: flex; flex-wrap: wrap; gap: 7px; }
     .svc-chip {
       font-size: .68rem;
-      font-weight: 500;
-      padding: 4px 11px;
+      font-weight: 600;
+      padding: 5px 12px;
       border-radius: var(--radius-pill);
       border: 1px solid;
       letter-spacing: .15px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
-    .svc-on  { color: var(--ok);   border-color: rgba(48,209,88,.22);  background: rgba(48,209,88,.07); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
-    .svc-off { color: var(--muted2); border-color: rgba(255,255,255,.06); background: rgba(255,255,255,.02); }
+    .svc-on  { color: #24b23e; border-color: rgba(52,199,89,.25); background: rgba(52,199,89,.05); }
+    .svc-off { color: var(--muted); border-color: var(--border); background: rgba(255,255,255,0.4); }
 
-    /* ── Refresh button ── */
+    /* ── Main Refresh Button ── */
     .refresh-wrap { text-align: center; margin-top: 40px; }
     #btn-refresh {
-      background: var(--accent);
+      background: var(--primary);
       color: #fff;
       border: none;
-      padding: 13px 38px;
+      padding: 14px 44px;
       border-radius: var(--radius-pill);
-      font-size: .9rem;
+      font-size: .95rem;
       font-weight: 500;
       font-family: var(--font);
-      letter-spacing: -0.1px;
+      letter-spacing: -0.01em;
       cursor: pointer;
-      transition: opacity .2s, transform .15s;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 6px 24px var(--accent-glow);
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
-    #btn-refresh:hover:not(:disabled) { opacity: .88; transform: scale(.98); }
-    #btn-refresh:active:not(:disabled) { transform: scale(.94); }
-    #btn-refresh:disabled { opacity: .30; cursor: default; }
-    #refresh-status { font-size:.73rem; color:var(--muted); margin-top:10px; min-height:1em; }
+    #btn-refresh:hover:not(:disabled) { background: var(--primary-focus); }
+    #btn-refresh:active:not(:disabled) { transform: scale(.97); }
+    #btn-refresh:disabled { opacity: .35; cursor: default; }
+    #refresh-status { font-size:.78rem; color:var(--muted); margin-top:12px; min-height:1em; }
 
-    /* ── Section header ── */
+    /* ── Section Titles ── */
     .section-title {
-      font-size: .65rem;
+      font-size: 20px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1.1px;
-      color: rgba(235,235,245,0.40);
-      margin: 30px 0 10px;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin: 36px 0 16px;
       padding-left: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
+    .section-title-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-title-icon svg {
+      width: 17px;
+      height: 17px;
+    }
+    .status-ok   { color: #24b23e; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; font-size: .62rem; letter-spacing: .4px; text-transform: uppercase; }
+    .status-warn { color: var(--danger); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; font-size: .62rem; letter-spacing: .4px; text-transform: uppercase; }
 
-    /* ── Manutenção ── */
+    /* ── Maintenance ── */
     .maint-empty {
       text-align: center;
-      padding: 28px 16px;
+      padding: 32px 16px;
       color: var(--muted);
     }
-    .maint-empty-icon { font-size: 2rem; margin-bottom: 8px; opacity: .7; }
+    .maint-empty-icon { margin-bottom: 8px; opacity: .7; }
+    .maint-empty-icon svg { width: 32px; height: 32px; }
     .maint-empty p    { font-size: .85rem; margin-top: 4px; }
 
     .maint-record {
       padding: 13px 0;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
       display: flex;
       align-items: flex-start;
       gap: 14px;
@@ -445,144 +523,173 @@
     .maint-record:last-child { border-bottom: none; }
     .maint-icon {
       width: 36px; height: 36px;
-      background: rgba(230,51,18,.10);
-      border: 1px solid rgba(230,51,18,.18);
-      border-radius: 10px;
+      background: rgba(0, 102, 204, 0.05);
+      border: 1px solid rgba(0, 102, 204, 0.12);
+      color: var(--primary);
+      border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
       flex-shrink: 0;
     }
+    .maint-icon svg { width: 18px; height: 18px; }
     .maint-info  { flex: 1; }
-    .maint-desc  { font-weight: 600; font-size: .88rem; letter-spacing: -0.1px; }
+    .maint-desc  { font-weight: 600; font-size: .88rem; color: var(--text); }
     .maint-meta  { font-size: .75rem; color: var(--muted); margin-top: 3px; }
     .maint-km    { font-size: .85rem; font-weight: 600; color: var(--muted); white-space: nowrap; }
 
     .cat-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 7px;
+      gap: 8px;
     }
     .cat-item {
-      background: rgba(255,255,255,.03);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.45);
+      border: 1px solid rgba(255,255,255,0.5);
       border-radius: var(--radius-sm);
-      padding: 9px 12px;
+      padding: 10px 12px;
       font-size: .75rem;
-      color: var(--muted);
+      color: var(--text);
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .cat-item::before { content: '🔧'; font-size: .8rem; }
 
-    /* ── Controle Remoto ── */
+    /* ── Remote Control Panel ── */
     .remote-panel {
-      background: rgba(255,255,255,0.07);
-      -webkit-backdrop-filter: var(--glass-blur-sm);
-      backdrop-filter: var(--glass-blur-sm);
+      background: var(--canvas);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
       border-radius: var(--radius);
-      padding: 20px 22px;
-      margin-bottom: 8px;
-      position: relative;
-      overflow: hidden;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.15),
-        inset 0 -1px 0 rgba(0,0,0,0.18),
-        0 6px 24px rgba(0,0,0,0.30);
-    }
-    .remote-panel::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 40%;
-      background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
-      pointer-events: none;
+      padding: 24px;
+      margin-bottom: 24px;
+      border-top: 1px solid var(--glass-border-top);
+      border-bottom: 1px solid var(--glass-border-bot);
+      border-left: 1px solid rgba(255,255,255,0.4);
+      border-right: 1px solid rgba(255,255,255,0.4);
+      box-shadow: var(--glass-shadow);
     }
     .remote-panel-title {
-      font-size: .66rem;
+      font-size: .72rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.9px;
+      letter-spacing: 0.8px;
       color: var(--muted);
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .remote-buttons {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
     }
     .remote-btn {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      padding: 9px 17px;
+      gap: 8px;
+      padding: 10px 20px;
       border-radius: var(--radius-pill);
-      background: rgba(255,255,255,.07);
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,0.5);
       color: var(--text);
       font-family: var(--font);
-      font-size: .83rem;
+      font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      transition: all .16s ease;
-      letter-spacing: -0.1px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 2px 8px rgba(0,0,0,.20);
-      border: 1px solid rgba(255,255,255,.10);
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: none;
     }
+    .remote-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
     .remote-btn:hover:not(:disabled) {
-      background: rgba(255,255,255,.13);
-      border-color: rgba(255,255,255,.22);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 4px 14px rgba(0,0,0,.25);
+      background: rgba(0,0,0,0.04);
+      border-color: rgba(0,0,0,0.15);
     }
-    .remote-btn:active:not(:disabled) { transform: scale(.95); opacity: .85; }
-    .remote-btn:disabled { opacity: .25; cursor: default; }
-    /* subtle color cues preserved but toned down */
-    .remote-btn.btn-on  { border-color: rgba(48,209,88,.35); color: var(--ok); }
-    .remote-btn.btn-off { border-color: rgba(230,51,18,.35); color: var(--accent); }
-    .remote-btn.btn-unlock { border-color: rgba(255,159,10,.35); color: var(--warn); }
-    .remote-btn.btn-lock   { border-color: rgba(10,132,255,.35); color: var(--blue); }
-    .remote-btn.btn-horn        { border-color: rgba(191,90,242,.35); color: #bf5af2; }
-    .remote-btn.btn-lights      { border-color: rgba(255,214,10,.35); color: #ffd60a; }
-    .remote-btn.btn-trunk-unlock{ border-color: rgba(48,209,88,.25);  color: var(--ok); }
-    .remote-btn.btn-trunk-lock  { border-color: rgba(48,209,88,.2);   color: #30d158aa; }
-    .remote-btn.btn-precond-on  { border-color: rgba(10,132,255,.3);  color: var(--blue); }
-    .remote-btn.btn-precond-off { border-color: rgba(10,132,255,.2);  color: #0a84ffaa; }
-    .remote-btn.btn-gps         { border-color: rgba(191,90,242,.3);  color: #bf5af2; }
+    .remote-btn:active:not(:disabled) { transform: scale(.97); }
+    .remote-btn:disabled { opacity: .35; cursor: default; }
+
+    .remote-btn.btn-on  { border-color: rgba(52,199,89,.4); color: #24b23e; background: rgba(52,199,89,.06); }
+    .remote-btn.btn-on:hover:not(:disabled) { background: rgba(52,199,89,.12); }
+    .remote-btn.btn-off { border-color: rgba(255,59,48,.4); color: #FF3B30; background: rgba(255,59,48,.06); }
+    .remote-btn.btn-off:hover:not(:disabled) { background: rgba(255,59,48,.12); }
+    .remote-btn.btn-unlock { border-color: rgba(255,159,10,.4); color: #e08800; background: rgba(255,159,10,.06); }
+    .remote-btn.btn-unlock:hover:not(:disabled) { background: rgba(255,159,10,.12); }
+    .remote-btn.btn-lock   { border-color: rgba(0,102,204,.4); color: #0066cc; background: rgba(0,102,204,.06); }
+    .remote-btn.btn-lock:hover:not(:disabled) { background: rgba(0,102,204,.12); }
+    .remote-btn.btn-horn        { border-color: rgba(191,90,242,.4); color: #bf5af2; background: rgba(191,90,242,.06); }
+    .remote-btn.btn-horn:hover:not(:disabled) { background: rgba(191,90,242,.12); }
+    .remote-btn.btn-lights      { border-color: rgba(255,214,10,.5); color: #b59500; background: rgba(255,214,10,.06); }
+    .remote-btn.btn-lights:hover:not(:disabled) { background: rgba(255,214,10,.12); }
+    .remote-btn.btn-trunk-unlock{ border-color: rgba(52,199,89,.3); color: #24b23e; background: rgba(52,199,89,.05); }
+    .remote-btn.btn-trunk-unlock:hover:not(:disabled) { background: rgba(52,199,89,.1); }
+    .remote-btn.btn-trunk-lock  { border-color: rgba(52,199,89,.25); color: #24b23e; background: rgba(52,199,89,.04); }
+    .remote-btn.btn-trunk-lock:hover:not(:disabled) { background: rgba(52,199,89,.08); }
+    .remote-btn.btn-precond-on  { border-color: rgba(0,102,204,.3); color: #0066cc; background: rgba(0,102,204,.05); }
+    .remote-btn.btn-precond-on:hover:not(:disabled) { background: rgba(0,102,204,.1); }
+    .remote-btn.btn-precond-off { border-color: rgba(0,102,204,.2); color: #0066cc; background: rgba(0,102,204,.04); }
+    .remote-btn.btn-precond-off:hover:not(:disabled) { background: rgba(0,102,204,.08); }
+    .remote-btn.btn-gps         { border-color: rgba(191,90,242,.3); color: #bf5af2; background: rgba(191,90,242,.05); }
+    .remote-btn.btn-gps:hover:not(:disabled) { background: rgba(191,90,242,.1); }
+
     .refresh-mini {
-      margin-top: .9rem; padding: .35rem .9rem; font-size: .76rem;
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.10);
-      color: var(--muted); border-radius: var(--radius-pill);
-      cursor: pointer; transition: all .18s; font-family: var(--font);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+      margin-top: 14px;
+      padding: 6px 16px;
+      font-size: 13px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(0,0,0,0.06);
+      color: var(--text);
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--font);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-    .refresh-mini:hover { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.22); color: var(--text); }
+    .refresh-mini svg { width: 13px; height: 13px; }
+    .refresh-mini:hover { background: rgba(0,0,0,0.04); color: #000000; border-color: rgba(0,0,0,0.12); }
+    .refresh-mini:active { transform: scale(0.97); }
+
     .door-row {
       display: flex; justify-content: space-between; align-items: center;
-      padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .88rem;
+      padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: .88rem;
     }
     .door-row:last-child { border-bottom: none; }
     .door-icon { font-size: 1rem; margin-right: .35rem; }
-    .status-locked   { color: var(--ok); }
-    .status-unlocked { color: var(--danger); }
-    .status-closed   { color: var(--ok); }
-    .status-open     { color: var(--danger); }
+    .status-locked   { color: #24b23e; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+    .status-unlocked { color: var(--danger); font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+    .status-closed   { color: #24b23e; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+    .status-open     { color: var(--danger); font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+    .status-locked svg, .status-unlocked svg, .status-closed svg, .status-open svg { width: 14px; height: 14px; }
+
     .map-link {
       display: inline-flex; align-items: center; gap: 6px;
-      margin-top: .75rem; padding: .4rem .9rem;
-      background: rgba(10,132,255,.10);
-      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-      border: 1px solid rgba(10,132,255,.28);
-      border-radius: var(--radius-pill); color: var(--blue);
-      text-decoration: none; font-size: .8rem; transition: all .18s;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+      margin-top: 14px; padding: 7px 18px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(0, 102, 204, 0.2);
+      border-radius: var(--radius-pill); color: var(--primary);
+      text-decoration: none; font-size: .82rem; transition: all .2s;
+      font-weight: 500;
     }
-    .map-link:hover { background: rgba(10,132,255,.18); border-color: rgba(10,132,255,.45); }
-    .trip-row {
-      display: flex; justify-content: space-between; padding: .38rem 0;
-      border-bottom: 1px solid var(--border); font-size: .86rem;
+    .map-link svg { width: 14px; height: 14px; }
+    .map-link:hover { background: rgba(0, 102, 204, 0.05); border-color: var(--primary); }
+
+    /* ── Location Map ── */
+    .location-map-wrap {
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      border: 1px solid rgba(0,0,0,0.07);
+      background: rgba(0,0,0,0.04);
+      min-height: 220px;
+      position: relative;
     }
-    .trip-row:last-child { border-bottom: none; }
+    .location-map-wrap iframe {
+      display: block;
+      width: 100%;
+      height: 260px;
+      border: 0;
+    }
+
     .remote-btn.loading::before {
       content: '';
       width: 13px; height: 13px;
@@ -595,64 +702,105 @@
     .pin-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
+      gap: 12px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
     }
-    .pin-row label { font-size: .78rem; color: var(--muted); white-space: nowrap; }
+    .pin-row label {
+      font-size: .85rem;
+      color: var(--muted);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pin-row label svg { width: 14px; height: 14px; }
     .pin-input {
-      background: rgba(255,255,255,.07);
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(0,0,0,0.08);
       border-radius: var(--radius-sm);
       color: var(--text);
-      padding: 8px 14px;
+      padding: 10px 14px;
       font-size: .92rem;
       font-family: var(--font);
       width: 104px;
       letter-spacing: 5px;
       text-align: center;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 2px 6px rgba(0,0,0,.20);
+      transition: all 0.2s;
     }
-    .pin-input:focus { outline: none; border-color: rgba(230,51,18,.50); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 0 0 3px rgba(230,51,18,.15); }
+    .pin-input:focus { outline: none; border-color: var(--primary); background: rgba(255,255,255,0.8); box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15); }
     .cmd-status {
-      margin-top: 12px;
-      font-size: .8rem;
+      margin-top: 16px;
+      font-size: .85rem;
       color: var(--muted);
       min-height: 1.2em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .cmd-status.ok   { color: var(--ok); }
-    .cmd-status.fail { color: var(--danger); }
+    .cmd-status.ok   { color: #24b23e; font-weight: 500; }
+    .cmd-status.fail { color: var(--danger); font-weight: 500; }
+
+    /* ── Mobile responsive ── */
+    @media (max-width: 640px) {
+      main { padding: 16px 12px 60px; }
+      .grid-4 { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .remote-buttons { flex-direction: column; }
+      .remote-btn { width: 100%; justify-content: center; }
+      .section-title { font-size: 18px; margin: 28px 0 12px; }
+      .stat-value { font-size: 32px; }
+      .global-nav-links { gap: 16px; }
+      .nav-status { display: none; }
+      .global-nav-links span svg { display: none; }
+    }
+    @media (min-width: 641px) and (max-width: 1024px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="header-icon">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <path d="M3 6h14M3 10h14M3 14h14" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
-      <circle cx="6.5" cy="17" r="2" fill="#fff" opacity=".9"/>
-      <circle cx="13.5" cy="17" r="2" fill="#fff" opacity=".9"/>
-    </svg>
+<div class="global-nav">
+  <div class="global-nav-container">
+    <div class="global-nav-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-2.8-4.2A2 2 0 0 0 13.5 5h-3a2 2 0 0 0-1.7.8L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+      Uconnect
+    </div>
+    <div class="global-nav-links">
+      <span class="active" data-scroll="hero"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Painel</span>
+      <span data-scroll="sec-veiculo"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-2.8-4.2A2 2 0 0 0 13.5 5h-3a2 2 0 0 0-1.7.8L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>Veículo</span>
+      <span data-scroll="sec-status"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Status</span>
+    </div>
+    <div class="nav-status">
+      <span class="nav-dot"></span>
+      Conectado
+    </div>
   </div>
-  <div>
-    <h1>Uconnect</h1>
-    <p>Jeep Compass — tempo real</p>
+</div>
+
+<header class="sub-nav-frosted">
+  <div class="sub-nav-container">
+    <div class="sub-nav-title">Jeep Compass <span class="sub-nav-model-year">2022</span></div>
+    <div id="last-update">—</div>
   </div>
-  <div id="last-update">—</div>
 </header>
 
 <div id="loading">
-  <div class="spinner"></div>
+  <div class="spinner">
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="17" stroke="rgba(0,0,0,0.08)" stroke-width="3"/>
+      <path d="M37 20a17 17 0 0 0-17-17" stroke="#0066cc" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
   <p>Buscando dados do veículo…</p>
 </div>
 
 <div id="error-box" style="display:none">
-  <span style="font-size:2rem">⚠️</span>
-  <strong style="font-size:1rem;font-weight:600;letter-spacing:-0.2px">Erro ao carregar dados</strong>
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  <strong style="font-size:1rem;font-weight:600;letter-spacing:-0.02em">Erro ao carregar dados</strong>
   <pre id="error-msg"></pre>
-  <button id="btn-retry" style="background:var(--accent);color:#fff;border:none;padding:10px 28px;border-radius:var(--radius-pill);cursor:pointer;font-size:.88rem;font-weight:500;font-family:var(--font);box-shadow:0 4px 16px var(--accent-glow)">Tentar novamente</button>
+  <button id="btn-retry" style="background:var(--primary);color:#fff;border:none;padding:10px 28px;border-radius:var(--radius-pill);cursor:pointer;font-size:.88rem;font-weight:500;font-family:var(--font);">Tentar novamente</button>
 </div>
 
 <main id="main">
@@ -661,108 +809,274 @@
   <div class="vehicle-hero" id="hero"></div>
 
   <!-- Controle Remoto -->
-  <p class="section-title">🎮 Controle Remoto</p>
+  <p class="section-title">
+    <span class="section-title-icon" style="background:rgba(0,102,204,0.08);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0066cc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M12 7V4"/><circle cx="8" cy="14" r="1.5"/><circle cx="16" cy="14" r="1.5"/></svg>
+    </span>
+    Controle Remoto
+  </p>
   <div class="remote-panel" id="remote-panel">
-    <div class="remote-panel-title">Comandos do Veículo</div>
+    <div class="remote-panel-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M12 7V4"/><circle cx="8" cy="14" r="1.5"/><circle cx="16" cy="14" r="1.5"/></svg>
+      Comandos do Veículo
+    </div>
     <div class="pin-row">
-      <label for="pin-input">🔒 PIN:</label>
+      <label for="pin-input">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        PIN:
+      </label>
       <input type="password" id="pin-input" class="pin-input" placeholder="••••" maxlength="6" inputmode="numeric" />
       <span style="font-size:.75rem;color:var(--muted)">(mesmo PIN do app Uconnect)</span>
     </div>
     <div class="remote-buttons">
-      <button class="remote-btn btn-on"  id="btn-engine-on" >🔑 Ligar Motor</button>
-      <button class="remote-btn btn-off" id="btn-engine-off">⏹ Desligar Motor</button>
-      <button class="remote-btn btn-unlock" id="btn-doors-unlock">🔓 Destrancar</button>
-      <button class="remote-btn btn-lock"   id="btn-doors-lock"  >🔐 Trancar</button>
-      <button class="remote-btn btn-horn"   id="btn-horn"        >📯 Buzina + Luzes</button>
-      <button class="remote-btn btn-lights" id="btn-lights"      >💡 Só Luzes</button>
-      <button class="remote-btn btn-trunk-unlock" id="btn-trunk-unlock">📦 Abrir Porta-Malas</button>
-      <button class="remote-btn btn-trunk-lock"   id="btn-trunk-lock"  >📦🔐 Fechar Porta-Malas</button>
-      <button class="remote-btn btn-precond-on"   id="btn-precond-on"  >❄️ Pré-climatizar</button>
-      <button class="remote-btn btn-precond-off"  id="btn-precond-off" >❄️ Parar Clim.</button>
-      <button class="remote-btn btn-gps" id="btn-gps-update">&#x1F4CD; Atualizar GPS</button>
+      <button class="remote-btn btn-on"  id="btn-engine-on" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h2a5 5 0 0 1 0 10h-2m-6 0H7A5 5 0 0 1 7 7h2"/><line x1="9" y1="12" x2="15" y2="12"/></svg> Ligar Motor</button>
+      <button class="remote-btn btn-off" id="btn-engine-off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> Desligar Motor</button>
+      <button class="remote-btn btn-unlock" id="btn-doors-unlock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg> Destrancar</button>
+      <button class="remote-btn btn-lock"   id="btn-doors-lock"  ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Trancar</button>
+      <button class="remote-btn btn-horn"   id="btn-horn"        ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Buzina + Luzes</button>
+      <button class="remote-btn btn-lights" id="btn-lights"      ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg> Só Luzes</button>
+      <button class="remote-btn btn-trunk-unlock" id="btn-trunk-unlock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> Abrir Porta-Malas</button>
+      <button class="remote-btn btn-trunk-lock"   id="btn-trunk-lock"  ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> Fechar Porta-Malas</button>
+      <button class="remote-btn btn-precond-on"   id="btn-precond-on"  ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="2" x2="8" y2="5"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="16" y1="2" x2="16" y2="5"/><path d="M4 10a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v0a8 8 0 0 1-16 0z"/><line x1="2" y1="22" x2="6" y2="22"/><line x1="10" y1="22" x2="14" y2="22"/><line x1="18" y1="22" x2="22" y2="22"/></svg> Pré-climatizar</button>
+      <button class="remote-btn btn-precond-off"  id="btn-precond-off" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="2" x2="8" y2="5"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="16" y1="2" x2="16" y2="5"/><path d="M4 10a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v0a8 8 0 0 1-16 0z"/><line x1="1" y1="1" x2="23" y2="23"/></svg> Parar Clim.</button>
+      <button class="remote-btn btn-gps" id="btn-gps-update"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Atualizar GPS</button>
     </div>
-    <div class="cmd-status" id="cmd-status">⬆ Informe seu PIN e clique em um comando</div>
+    <div class="cmd-status" id="cmd-status">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Informe seu PIN e clique em um comando
+    </div>
   </div>
 
   <!-- Key metrics -->
-  <p class="section-title">📊 Status Atual</p>
+  <p class="section-title" id="sec-status">
+    <span class="section-title-icon" style="background:rgba(0,102,204,0.08);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0066cc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </span>
+    Status Atual
+  </p>
   <div class="grid grid-4" id="metrics"></div>
 
   <!-- Tyres + Trips -->
-  <p class="section-title">🔧 Detalhes</p>
+  <p class="section-title">
+    <span class="section-title-icon" style="background:rgba(175,82,222,0.08);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#af52de" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+    </span>
+    Detalhes
+  </p>
   <div class="grid grid-2">
     <div class="card">
-      <div class="card-title">🛞 Pressão dos Pneus</div>
+      <div class="card-title">
+        <span class="card-title-icon" style="background:rgba(134,134,139,0.1);color:var(--muted);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+        </span>
+        Pressão dos Pneus
+      </div>
       <div class="tyre-grid" id="tyres"></div>
     </div>
     <div class="card">
-      <div class="card-title">🗺️ Viagens</div>
+      <div class="card-title">
+        <span class="card-title-icon" style="background:rgba(0,102,204,0.06);color:var(--primary);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+        </span>
+        Viagens
+      </div>
       <div id="trips"></div>
     </div>
   </div>
-  <!-- Portas / Janelas / Status Remoto -->
-  <p class="section-title">🚪 Portas & Janelas</p>
-  <div class="grid grid-2">
-    <div class="card" id="doors-card">
-      <div class="card-title">🚪 Status das Portas</div>
-      <div id="doors-status"><span class="muted">Clique em “Atualizar” para carregar</span></div>
-      <button class="refresh-mini" id="btn-refresh-doors" onclick="loadDoorsStatus()">🔄 Atualizar</button>
+
+  <!-- Portas / Janelas -->
+  <p class="section-title">
+    <span class="section-title-icon" style="background:rgba(255,159,10,0.08);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10"/><path d="M14 12h.01"/></svg>
+    </span>
+    Portas &amp; Janelas
+  </p>
+  <div class="card" id="doors-card">
+    <div class="card-title">
+      <span class="card-title-icon" style="background:rgba(255,159,10,0.08);color:var(--warn);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10"/><path d="M14 12h.01"/></svg>
+      </span>
+      Status das Portas
     </div>
-    <div class="card" id="location-card">
-      <div class="card-title">📍 Localização GPS</div>
-      <div id="location-status"><span class="muted">Clique em “Atualizar” para carregar</span></div>
-      <button class="refresh-mini" id="btn-refresh-location" onclick="loadLocationStatus()">🔄 Atualizar</button>
+    <div id="doors-status"><span class="muted">Clique em "Atualizar" para carregar</span></div>
+    <button class="refresh-mini" id="btn-refresh-doors" onclick="loadDoorsStatus()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Atualizar
+    </button>
+  </div>
+
+  <!-- Localização GPS -->
+  <p class="section-title">
+    <span class="section-title-icon" style="background:rgba(175,82,222,0.08);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#af52de" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    </span>
+    Localização GPS
+  </p>
+  <div class="card" id="location-card">
+    <div class="card-title">
+      <span class="card-title-icon" style="background:rgba(175,82,222,0.08);color:#af52de;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </span>
+      Posição do Veículo
+      <button class="refresh-mini" id="btn-refresh-location" onclick="loadLocationStatus()" style="margin-left:auto;margin-top:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Atualizar
+      </button>
+    </div>
+    <div id="location-status">
+      <div class="location-map-wrap" style="background:rgba(175,82,222,0.04);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.85rem;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Carregando localização…
+      </div>
     </div>
   </div>
 
   <!-- Última Viagem -->
-  <p class="section-title">🏎️ Última Viagem</p>
+  <p class="section-title">
+    <span class="section-title-icon" style="background:rgba(52,199,89,0.08);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-2.8-4.2A2 2 0 0 0 13.5 5h-3a2 2 0 0 0-1.7.8L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+    </span>
+    Última Viagem
+  </p>
   <div class="grid grid-2">
     <div class="card" id="lasttrip-card">
-      <div class="card-title">🗓 Dados da Viagem</div>
-      <div id="lasttrip-data"><span class="muted">Clique em “Atualizar” para carregar</span></div>
-      <button class="refresh-mini" onclick="loadLastTrip()">🔄 Atualizar</button>
+      <div class="card-title">
+        <span class="card-title-icon" style="background:rgba(52,199,89,0.08);color:#24b23e;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L2 22"/><path d="M18 2l4 20"/><line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="10" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </span>
+        Dados da Viagem
+      </div>
+      <div id="lasttrip-data"><span class="muted">Clique em "Atualizar" para carregar</span></div>
+      <button class="refresh-mini" onclick="loadLastTrip()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Atualizar
+      </button>
     </div>
     <div class="card">
-      <div class="card-title">📊 Eco Score</div>
+      <div class="card-title">
+        <span class="card-title-icon" style="background:rgba(52,199,89,0.08);color:#24b23e;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75"/></svg>
+        </span>
+        Eco Score
+      </div>
       <div id="ecoscore-data"><span class="muted">Disponível após atualizar viagem</span></div>
     </div>
   </div>
 
   <!-- Manutenção -->
-  <p class="section-title">📖 Histórico de Manutenção</p>
+  <p class="section-title">
+    <span class="section-title-icon" style="background:rgba(0,102,204,0.08);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0066cc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    </span>
+    Histórico de Manutenção
+  </p>
   <div class="grid grid-2">
     <div class="card">
-      <div class="card-title">📅 Registros de Serviço</div>
+      <div class="card-title">
+        <span class="card-title-icon" style="background:rgba(0,0,0,0.04);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </span>
+        Registros de Serviço
+      </div>
       <div id="maint-history"></div>
     </div>
     <div class="card">
-      <div class="card-title">📂 Categorias Disponíveis</div>
+      <div class="card-title">
+        <span class="card-title-icon" style="background:rgba(0,0,0,0.04);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </span>
+        Categorias Disponíveis
+      </div>
       <div class="cat-grid" id="maint-categories"></div>
     </div>
   </div>
+
   <!-- Vehicle info + Services -->
-  <p class="section-title">🚗 Informações do Veículo</p>
+  <p class="section-title" id="sec-veiculo">
+    <span class="section-title-icon" style="background:rgba(134,134,139,0.1);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    </span>
+    Informações do Veículo
+  </p>
   <div class="grid grid-2">
     <div class="card">
-      <div class="card-title">🪪 Identificação</div>
+      <div class="card-title">
+        <span class="card-title-icon" style="background:rgba(0,0,0,0.04);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        </span>
+        Identificação
+      </div>
       <table class="info-table" id="veh-info"></table>
     </div>
     <div class="card">
-      <div class="card-title">⚙️ Serviços Ativos</div>
+      <div class="card-title">
+        <span class="card-title-icon" style="background:rgba(0,0,0,0.04);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </span>
+        Serviços Ativos
+      </div>
       <div class="services-wrap" id="services"></div>
     </div>
   </div>
 
   <div class="refresh-wrap">
-    <button id="btn-refresh">🔄 Atualizar dados</button>
+    <button id="btn-refresh">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Atualizar dados
+    </button>
     <div id="refresh-status"></div>
   </div>
 
 </main>
 
 <script>
+// ─── SVG ICON LIBRARY ────────────────────────────────────────────────────────
+const SVG = {
+  fuel: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17"/><path d="M15 10h2a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2v0a2 2 0 0 0 2-2V9l-3-3"/><path d="M3 22h12"/><rect x="6" y="7" width="6" height="5" rx="1"/></svg>',
+  road: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L2 22"/><path d="M18 2l4 20"/><line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="10" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+  speedometer: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-4.95 4.95"/><circle cx="12" cy="12" r="1"/></svg>',
+  wrench: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+  tire: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>',
+  map: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>',
+  door: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10"/><path d="M14 12h.01"/></svg>',
+  lock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  unlock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>',
+  key: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h2a5 5 0 0 1 0 10h-2m-6 0H7A5 5 0 0 1 7 7h2"/><line x1="9" y1="12" x2="15" y2="12"/></svg>',
+  horn: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>',
+  lightbulb: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>',
+  trunk: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
+  snowflake: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="4.93" y2="19.07"/></svg>',
+  gps: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  refresh: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>',
+  battery: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="18" height="12" rx="2" ry="2"/><line x1="23" y1="10" x2="23" y2="14"/></svg>',
+  calendar: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  chart: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+  car: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-2.8-4.2A2 2 0 0 0 13.5 5h-3a2 2 0 0 0-1.7.8L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>',
+  idcard: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
+  gear: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  folder: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
+  book: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+  check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+  checkSmall: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  warning: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  clock: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  stop: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+  satellite: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
+  arrowDown: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>',
+  send: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+  mountain: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3l4 8 5-5 5 15H2L8 3z"/></svg>',
+  ruler: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3H3v18h18V3z"/><path d="M3 9h4"/><path d="M3 15h4"/><path d="M9 3v4"/><path d="M15 3v4"/></svg>',
+  duration: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  leaf: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75"/></svg>',
+  speed: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+  window: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>',
+  oil: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-5.5 5.5-8 8.5-8 12a8 8 0 1 0 16 0c0-3.5-2.5-6.5-8-12z"/></svg>',
+  brake: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>',
+  thermometer: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>',
+  circle: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>',
+  rain: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v8"/><path d="M8 13v8"/><path d="M12 15v8"/><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/></svg>',
+};
+
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 // O script Node.js gera o JSON — aqui lemos o arquivo mais recente via fetch
 // OU, se abrir localmente como file://, usamos os dados embutidos diretamente.
@@ -841,7 +1155,7 @@ function render(data) {
         <span style="font-family:monospace;font-size:.78rem;color:var(--muted)">${vin}</span><br>
         <span style="color:var(--text);font-size:.82rem">${vehicle.color}</span>
       </div>
-      <span class="badge">✓ ${vehicle.regStatus.replace(/_/g,' ')}</span>
+      <span class="badge">${SVG.checkSmall} ${vehicle.regStatus.replace(/_/g,' ')}</span>
     </div>
   `;
 
@@ -855,7 +1169,7 @@ function render(data) {
   el('metrics').innerHTML = `
     <!-- Combustível -->
     <div class="card">
-      <div class="card-title">⛽ Combustível</div>
+      <div class="card-title"><span class="card-title-icon" style="background:rgba(255,159,10,0.1);color:var(--warn)">${SVG.fuel}</span> Combustível</div>
       <div class="stat-value" style="color:${colorByPct(fuelPct)}">${fuelPct}<span style="font-size:1rem">%</span></div>
       <div class="stat-unit">${info.fuel.fuelAmount.value} litros restantes</div>
       <div class="progress-wrap" style="margin-top:14px">
@@ -865,26 +1179,27 @@ function render(data) {
 
     <!-- Autonomia -->
     <div class="card">
-      <div class="card-title">🛣️ Autonomia Restante</div>
+      <div class="card-title"><span class="card-title-icon" style="background:rgba(0,102,204,0.08);color:var(--primary)">${SVG.road}</span> Autonomia Restante</div>
       <div class="stat-value">${parseInt(dte).toLocaleString('pt-BR')}</div>
       <div class="stat-unit">km até o tanque vazio</div>
     </div>
 
     <!-- Odômetro -->
     <div class="card">
-      <div class="card-title">📍 Odômetro</div>
+      <div class="card-title"><span class="card-title-icon" style="background:rgba(134,134,139,0.1);color:var(--muted)">${SVG.speedometer}</span> Odômetro</div>
       <div class="stat-value">${odo}</div>
       <div class="stat-unit">km rodados no total</div>
     </div>
 
     <!-- Próxima revisão -->
     <div class="card">
-      <div class="card-title">🔧 Próxima Revisão</div>
+      <div class="card-title"><span class="card-title-icon" style="background:rgba(255,59,48,0.08);color:var(--danger)">${SVG.wrench}</span> Próxima Revisão</div>
       <div class="stat-value" style="font-size:1.7rem">${dts}</div>
       <div class="stat-unit">km restantes para revisão</div>
-      <div style="margin-top:12px;display:flex;align-items:center;gap:8px">
-        <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="var(--muted)" stroke-width="1.5"/><path d="M8 5v3.5l2 1.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <span style="font-size:.78rem;color:var(--muted)">Bateria: ${batV} V</span>
+      <div style="margin-top:14px;display:inline-flex;align-items:center;gap:7px;background:rgba(52,199,89,0.07);border:1px solid rgba(52,199,89,0.18);border-radius:8px;padding:6px 12px;color:#24b23e">
+        ${SVG.battery}
+        <span style="font-size:.85rem;font-weight:600">${batV} V</span>
+        <span style="font-size:.72rem;color:var(--muted);font-weight:400">bateria</span>
       </div>
     </div>
   `;
@@ -902,7 +1217,7 @@ function render(data) {
         <div class="tyre-label">${tyrePos(pos)}</div>
         <div class="tyre-value">${psi}</div>
         <div style="font-size:.65rem;color:var(--muted)">psi &nbsp;(${kpa} kPa)</div>
-        <div class="tyre-status ${warn ? 'status-warn' : 'status-ok'}">${warn ? '⚠ '+t.status.replace(/_/g,' ') : '✓ Normal'}</div>
+        <div class="tyre-status ${warn ? 'status-warn' : 'status-ok'}">${warn ? SVG.warning + ' ' + t.status.replace(/_/g,' ') : SVG.checkSmall + ' Normal'}</div>
       </div>
     `;
   }).join('');
@@ -944,7 +1259,7 @@ function render(data) {
     .map(s => s.service);
 
   el('services').innerHTML =
-    enabledSvcs.map(s => `<span class="svc-chip svc-on">✓ ${s}</span>`).join('') +
+    enabledSvcs.map(s => `<span class="svc-chip svc-on">${SVG.checkSmall} ${s}</span>`).join('') +
     disabledSvcs.map(s => `<span class="svc-chip svc-off">${s}</span>`).join('');
 
   // ── Manutenção ──
@@ -956,26 +1271,26 @@ function render(data) {
   (maint?.nonfcaServiceCategoryList || []).forEach(c => { catMap[c.id] = c.description; });
 
   const serviceIcons = {
-    'Oil Change':           '🛢',
-    'Brakes':               '🔴',
-    'Tire Rotation':        '🔄',
-    'Battery':              '🔋',
-    'Filters/Bulbs':        '💡',
-    'Air Conditioning':     '❄️',
-    'Cooling System':       '🌡️',
-    'Fuel System':          '⛽',
-    'Transmission':         '⚙️',
-    'Shocks/Struts':        '🚗',
-    'Suspension/Alignment': '🔧',
-    'Wheel Balance':        '⭕',
-    'Wiper Blades':         '🌧️',
-    'Other':                '📦',
+    'Oil Change':           SVG.oil,
+    'Brakes':               SVG.brake,
+    'Tire Rotation':        SVG.refresh,
+    'Battery':              SVG.battery,
+    'Filters/Bulbs':        SVG.lightbulb,
+    'Air Conditioning':     SVG.snowflake,
+    'Cooling System':       SVG.thermometer,
+    'Fuel System':          SVG.fuel,
+    'Transmission':         SVG.gear,
+    'Shocks/Struts':        SVG.car,
+    'Suspension/Alignment': SVG.wrench,
+    'Wheel Balance':        SVG.circle,
+    'Wiper Blades':         SVG.rain,
+    'Other':                SVG.trunk,
   };
 
   if (history.length === 0) {
     el('maint-history').innerHTML = `
       <div class="maint-empty">
-        <div class="maint-empty-icon">📚</div>
+        <div class="maint-empty-icon">${SVG.book}</div>
         <strong>Nenhum registro encontrado</strong>
         <p>O histórico de manutenção da FCA está vazio.<br>Registros de oficinas externas podem ser adicionados pelo app Uconnect.</p>
       </div>
@@ -983,7 +1298,7 @@ function render(data) {
   } else {
     el('maint-history').innerHTML = history.map(r => {
       const catName = catMap[r.serviceCategory] || r.serviceCategory || 'Serviço';
-      const icon    = serviceIcons[catName] || '🔧';
+      const icon    = serviceIcons[catName] || SVG.wrench;
       const date    = r.serviceDate ? new Date(r.serviceDate).toLocaleDateString('pt-BR') : '—';
       const km      = r.odometer    ? parseInt(r.odometer).toLocaleString('pt-BR') + ' km' : '';
       const dealer  = r.dealerName  ? `<br>${r.dealerName}` : '';
@@ -1003,13 +1318,16 @@ function render(data) {
 
   // Categorias disponíveis
   el('maint-categories').innerHTML = (maint?.nonfcaServiceCategoryList || []).map(c =>
-    `<div class="cat-item">${c.description}</div>`
+    `<div class="cat-item">${SVG.wrench} ${c.description}</div>`
   ).join('');
 
   // Mostrar
   el('loading').style.display = 'none';
   el('error-box').style.display = 'none';
   el('main').style.display = 'block';
+
+  // Auto-carregar localização GPS após render
+  setTimeout(() => loadLocationStatus(), 600);
 }
 
 // ─── LOAD DATA ───────────────────────────────────────────────────────────────
@@ -1027,7 +1345,7 @@ async function loadData() {
   }
 
   el('btn-refresh').disabled = true;
-  el('btn-refresh').textContent = '⏳ Buscando dados...';
+  el('btn-refresh').innerHTML = SVG.clock + ' Buscando dados...';
   el('refresh-status').textContent = '';
 
   try {
@@ -1056,7 +1374,7 @@ async function loadData() {
 
     render(data);
     isFirstLoad = false;
-    el('refresh-status').textContent = `✓ Atualizado às ${new Date().toLocaleTimeString('pt-BR')}`;
+    el('refresh-status').textContent = `Atualizado às ${new Date().toLocaleTimeString('pt-BR')}`;
 
   } catch (err) {
     if (!isRefresh) {
@@ -1064,12 +1382,12 @@ async function loadData() {
       el('error-box').style.display = 'flex';
       el('error-msg').textContent = err.message;
     } else {
-      el('refresh-status').textContent = `⚠ Erro: ${err.message.split('\n')[0]}`;
+      el('refresh-status').textContent = `Erro: ${err.message.split('\n')[0]}`;
       el('refresh-status').style.color = 'var(--danger)';
     }
   } finally {
     el('btn-refresh').disabled = false;
-    el('btn-refresh').textContent = '🔄 Atualizar dados';
+    el('btn-refresh').innerHTML = SVG.refresh + ' Atualizar dados';
   }
 }
 
@@ -1080,16 +1398,16 @@ let _currentVin = null;
 
 // Mapeamento botão → comando
 const REMOTE_COMMANDS = [
-  { id: 'btn-engine-on',    command: 'REON',  apiVersion: 'v1', cmdUrl: 'remote', label: '🔑 Ligar Motor' },
-  { id: 'btn-engine-off',   command: 'REOFF', apiVersion: 'v1', cmdUrl: 'remote', label: '⏹ Desligar Motor' },
-  { id: 'btn-lights',       command: 'ROLIGHTS', apiVersion: 'v1', cmdUrl: 'remote', label: '💡 Só Luzes' },
-  { id: 'btn-trunk-unlock', command: 'ROTRUNKUNLOCK', apiVersion: 'v2', cmdUrl: 'remote', label: '📦 Abrir Porta-Malas' },
-  { id: 'btn-trunk-lock',   command: 'ROTRUNKLOCK',   apiVersion: 'v2', cmdUrl: 'remote', label: '📦🔐 Fechar Porta-Malas' },
-  { id: 'btn-precond-on',   command: 'ROPRECOND',     apiVersion: 'v1', cmdUrl: 'remote', label: '❄️ Pré-climatizar' },
-  { id: 'btn-precond-off',  command: 'ROPRECOND_OFF', apiVersion: 'v1', cmdUrl: 'remote', label: '❄️ Parar Clim.' },
-  { id: 'btn-doors-unlock', command: 'RDU',   apiVersion: 'v1', cmdUrl: 'remote', label: '🔓 Destrancar' },
-  { id: 'btn-doors-lock',   command: 'RDL',   apiVersion: 'v1', cmdUrl: 'remote', label: '🔐 Trancar' },
-  { id: 'btn-horn',         command: 'HBLF',  apiVersion: 'v1', cmdUrl: 'remote', label: '📯 Buzina + Luzes' },
+  { id: 'btn-engine-on',    command: 'REON',  apiVersion: 'v1', cmdUrl: 'remote', label: 'Ligar Motor' },
+  { id: 'btn-engine-off',   command: 'REOFF', apiVersion: 'v1', cmdUrl: 'remote', label: 'Desligar Motor' },
+  { id: 'btn-lights',       command: 'ROLIGHTS', apiVersion: 'v1', cmdUrl: 'remote', label: 'Só Luzes' },
+  { id: 'btn-trunk-unlock', command: 'ROTRUNKUNLOCK', apiVersion: 'v2', cmdUrl: 'remote', label: 'Abrir Porta-Malas' },
+  { id: 'btn-trunk-lock',   command: 'ROTRUNKLOCK',   apiVersion: 'v2', cmdUrl: 'remote', label: 'Fechar Porta-Malas' },
+  { id: 'btn-precond-on',   command: 'ROPRECOND',     apiVersion: 'v1', cmdUrl: 'remote', label: 'Pré-climatizar' },
+  { id: 'btn-precond-off',  command: 'ROPRECOND_OFF', apiVersion: 'v1', cmdUrl: 'remote', label: 'Parar Clim.' },
+  { id: 'btn-doors-unlock', command: 'RDU',   apiVersion: 'v1', cmdUrl: 'remote', label: 'Destrancar' },
+  { id: 'btn-doors-lock',   command: 'RDL',   apiVersion: 'v1', cmdUrl: 'remote', label: 'Trancar' },
+  { id: 'btn-horn',         command: 'HBLF',  apiVersion: 'v1', cmdUrl: 'remote', label: 'Buzina + Luzes' },
 ];
 
 // O btn-gps-update é tratado separadamente (não é um comando padrão)
@@ -1101,11 +1419,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // ─── GPS Update ───────────────────────────────────────────────────────────────
 async function handleGpsUpdate() {
   const pin = document.getElementById('pin-input').value.trim();
-  if (!pin) { setCmdStatus('⚠ Informe o PIN primeiro', 'fail'); return; }
-  if (!_currentVin) { setCmdStatus('⚠ Carregue os dados primeiro', 'fail'); return; }
+  if (!pin) { setCmdStatus('Informe o PIN primeiro', 'fail'); return; }
+  if (!_currentVin) { setCmdStatus('Carregue os dados primeiro', 'fail'); return; }
   const btn = document.getElementById('btn-gps-update');
   btn.disabled = true;
-  setCmdStatus('📡 Solicitando atualização de GPS...');
+  setCmdStatus('Solicitando atualização de GPS...');
   try {
     const res = await fetch('/api/location/update', {
       method: 'POST',
@@ -1114,10 +1432,10 @@ async function handleGpsUpdate() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-    setCmdStatus('📡 GPS atualizado! Recarregando localização em 10s...', 'ok');
+    setCmdStatus('GPS atualizado! Recarregando localização em 10s...', 'ok');
     setTimeout(() => loadLocationStatus(), 10000);
   } catch (err) {
-    setCmdStatus(`❌ ${err.message}`, 'fail');
+    setCmdStatus(`${err.message}`, 'fail');
   } finally {
     btn.disabled = false;
   }
@@ -1142,26 +1460,26 @@ async function loadDoorsStatus() {
       if (val === undefined || val === null) return '<span class="muted">—</span>';
       const isLocked = (String(val).toUpperCase() === lockedVal.toUpperCase());
       return isLocked
-        ? `<span class="status-locked">🔒 ${val}</span>`
-        : `<span class="status-unlocked">🔓 ${val}</span>`;
+        ? `<span class="status-locked">${SVG.lock} ${val}</span>`
+        : `<span class="status-unlocked">${SVG.unlock} ${val}</span>`;
     }
     function closedIcon(val) {
       if (val === undefined || val === null) return '<span class="muted">—</span>';
       const isClosed = (String(val).toUpperCase() === 'CLOSED');
       return isClosed
-        ? `<span class="status-closed">✅ ${val}</span>`
-        : `<span class="status-open">⚠️ ${val}</span>`;
+        ? `<span class="status-closed">${SVG.check} ${val}</span>`
+        : `<span class="status-open">${SVG.warning} ${val}</span>`;
     }
 
     const rows = [
-      ['🚗 Motor',          statusIcon(engine.status, 'ON')],
-      ['🪟 Porta-motorista',statusIcon(doors?.driver?.status)],
-      ['🪟 Porta-passageiro',statusIcon(doors?.passenger?.status)],
-      ['🪟 Traseira esq.',  statusIcon(doors?.leftRear?.status)],
-      ['🪟 Traseira dir.',  statusIcon(doors?.rightRear?.status)],
-      ['📦 Porta-malas',    statusIcon(trunk.status)],
-      ['💨 Janela mot.',    closedIcon(windows?.driver?.status)],
-      ['💨 Janela pass.',   closedIcon(windows?.passenger?.status)],
+      [SVG.car + ' Motor',          statusIcon(engine.status, 'ON')],
+      [SVG.door + ' Porta-motorista',statusIcon(doors?.driver?.status)],
+      [SVG.door + ' Porta-passageiro',statusIcon(doors?.passenger?.status)],
+      [SVG.door + ' Traseira esq.',  statusIcon(doors?.leftRear?.status)],
+      [SVG.door + ' Traseira dir.',  statusIcon(doors?.rightRear?.status)],
+      [SVG.trunk + ' Porta-malas',    statusIcon(trunk.status)],
+      [SVG.window + ' Janela mot.',    closedIcon(windows?.driver?.status)],
+      [SVG.window + ' Janela pass.',   closedIcon(windows?.passenger?.status)],
     ];
 
     el.innerHTML = rows.map(([label, value]) =>
@@ -1171,7 +1489,7 @@ async function loadDoorsStatus() {
     // Timestamp
     if (data.timestamp) {
       const ts = new Date(data.timestamp).toLocaleString('pt-BR');
-      el.innerHTML += `<div style="margin-top:.6rem;font-size:.75rem;color:var(--muted)">⏱ ${ts}</div>`;
+      el.innerHTML += `<div style="margin-top:.6rem;font-size:.75rem;color:var(--muted)">${SVG.clock} ${ts}</div>`;
     }
   } catch (err) {
     el.innerHTML = `<span class="muted">Erro: ${err.message}</span>`;
@@ -1182,33 +1500,49 @@ async function loadDoorsStatus() {
 async function loadLocationStatus() {
   if (!_currentVin) return;
   const el = document.getElementById('location-status');
-  el.innerHTML = '<span class="muted">Carregando...</span>';
+  el.innerHTML = `
+    <div class="location-map-wrap" style="background:rgba(175,82,222,0.04);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.85rem;gap:8px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Carregando localização…
+    </div>`;
   try {
     const res  = await fetch(`/api/location?vin=${encodeURIComponent(_currentVin)}`, { headers: apiHeaders() });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
 
-    const lat = data.latitude  || data.positionLatitude;
-    const lon = data.longitude || data.positionLongitude;
-    const alt = data.altitude  || data.positionAltitude;
-    const ts  = data.timeStamp ? new Date(data.timeStamp).toLocaleString('pt-BR') : '—';
+    const lat    = data.latitude  || data.positionLatitude;
+    const lon    = data.longitude || data.positionLongitude;
+    const alt    = data.altitude  || data.positionAltitude;
+    const ts     = data.timeStamp ? new Date(data.timeStamp).toLocaleString('pt-BR') : '—';
     const approx = data.isLocationApprox ? ' (aprox.)' : '';
 
     if (!lat || !lon) {
-      el.innerHTML = '<span class="muted">Localização não disponível</span>';
+      el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted)">Localização não disponível</div>';
       return;
     }
 
-    const mapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+    const mapsUrl  = `https://www.google.com/maps?q=${lat},${lon}`;
+    const embedUrl = `https://maps.google.com/maps?q=${lat},${lon}&z=16&output=embed&hl=pt-BR`;
+
     el.innerHTML = `
-      <div class="door-row"><span>📍 Latitude</span><span>${lat.toFixed(6)}</span></div>
-      <div class="door-row"><span>📍 Longitude</span><span>${lon.toFixed(6)}</span></div>
-      ${alt ? `<div class="door-row"><span>⛰️ Altitude</span><span>${alt} m</span></div>` : ''}
-      <div class="door-row"><span>🕐 Atualizado</span><span>${ts}${approx}</span></div>
-      <a class="map-link" href="${mapsUrl}" target="_blank">🗺️ Abrir no Google Maps</a>
+      <div class="location-map-wrap">
+        <iframe
+          src="${embedUrl}"
+          loading="lazy"
+          allowfullscreen
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+        <div class="door-row"><span>${SVG.gps} Latitude</span><span style="font-family:monospace;font-size:.8rem">${lat.toFixed(6)}</span></div>
+        <div class="door-row"><span>${SVG.gps} Longitude</span><span style="font-family:monospace;font-size:.8rem">${lon.toFixed(6)}</span></div>
+      </div>
+      ${alt ? `<div class="door-row"><span>${SVG.mountain} Altitude</span><span>${alt} m</span></div>` : ''}
+      <div class="door-row"><span>${SVG.clock} Posição registrada</span><span>${ts}${approx}</span></div>
+      <a class="map-link" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">${SVG.map} Abrir no Google Maps</a>
     `;
   } catch (err) {
-    el.innerHTML = `<span class="muted">Erro: ${err.message}</span>`;
+    el.innerHTML = `<div style="padding:32px;text-align:center;color:var(--muted)">Erro: ${err.message}</div>`;
   }
 }
 
@@ -1231,14 +1565,14 @@ async function loadLastTrip() {
       if (value !== undefined && value !== null) rows.push([label, `${value}${unit}`]);
     }
 
-    addRow('📏 Distância',   trip.distance?.value || trip.distanceDriven, ' km');
-    addRow('⏱ Duração',      trip.duration?.value || trip.tripDuration, ' min');
-    addRow('⛽ Consumo',      trip.fuelConsumption?.value || trip.averageFuelConsumption, ' L/100km');
-    addRow('🌿 Eco Score',    trip.ecoScore || trip.globalScore);
-    addRow('🚀 Vel. máx.',   trip.maxSpeed?.value || trip.maxSpeed, ' km/h');
-    addRow('📊 Vel. média',  trip.averageSpeed?.value || trip.averageSpeed, ' km/h');
-    addRow('📅 Data início', trip.startDate || trip.startTime);
-    addRow('📅 Data fim',    trip.endDate   || trip.endTime);
+    addRow(SVG.ruler + ' Distância',   trip.distance?.value || trip.distanceDriven, ' km');
+    addRow(SVG.duration + ' Duração',      trip.duration?.value || trip.tripDuration, ' min');
+    addRow(SVG.fuel + ' Consumo',      trip.fuelConsumption?.value || trip.averageFuelConsumption, ' L/100km');
+    addRow(SVG.leaf + ' Eco Score',    trip.ecoScore || trip.globalScore);
+    addRow(SVG.speed + ' Vel. máx.',   trip.maxSpeed?.value || trip.maxSpeed, ' km/h');
+    addRow(SVG.chart + ' Vel. média',  trip.averageSpeed?.value || trip.averageSpeed, ' km/h');
+    addRow(SVG.calendar + ' Data início', trip.startDate || trip.startTime);
+    addRow(SVG.calendar + ' Data fim',    trip.endDate   || trip.endTime);
 
     if (rows.length === 0) {
       el.innerHTML = `<details><summary class="muted" style="cursor:pointer">Ver dados brutos</summary><pre style="font-size:.7rem;overflow:auto;max-height:200px">${JSON.stringify(data, null, 2)}</pre></details>`;
@@ -1257,7 +1591,7 @@ async function loadLastTrip() {
         <div style="text-align:center;padding:1rem">
           <div style="font-size:3rem;font-weight:700;color:${color}">${pct}</div>
           <div style="color:var(--muted);font-size:.85rem">/ 100</div>
-          <div style="margin-top:.5rem;height:8px;background:rgba(255,255,255,.1);border-radius:4px">
+          <div style="margin-top:.5rem;height:8px;background:var(--border);border-radius:4px">
             <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width .5s"></div>
           </div>
         </div>`;
@@ -1306,7 +1640,7 @@ async function pollCommandStatus(vin, correlationId) {
     // Cancelado por novo comando → para silenciosamente
     if (_pollCancelToken !== token) return false;
 
-    setCmdStatus(`📡 Aguardando confirmação do veículo... (${i + 1}/${MAX})`);
+    setCmdStatus(`Aguardando confirmação do veículo... (${i + 1}/${MAX})`);
 
     // ── 1. Endpoint direto ────────────────────────────────────────────────
     try {
@@ -1339,12 +1673,12 @@ async function pollCommandStatus(vin, correlationId) {
 async function sendRemoteCommand(cmdDef) {
   const pin = document.getElementById('pin-input').value.trim();
   if (!pin) {
-    setCmdStatus('⚠ Informe seu PIN primeiro', 'fail');
+    setCmdStatus('Informe seu PIN primeiro', 'fail');
     document.getElementById('pin-input').focus();
     return;
   }
   if (!_currentVin) {
-    setCmdStatus('⚠ Carregue os dados do veículo primeiro', 'fail');
+    setCmdStatus('Carregue os dados do veículo primeiro', 'fail');
     return;
   }
 
@@ -1353,7 +1687,7 @@ async function sendRemoteCommand(cmdDef) {
   btn.classList.add('loading');
   btn.textContent = '';
   setRemoteButtonsDisabled(true);
-  setCmdStatus(`⏳ Enviando comando "${cmdDef.command}"...`);
+  setCmdStatus(`Enviando comando "${cmdDef.command}"...`);
 
   let correlationId = null;
 
@@ -1387,12 +1721,12 @@ async function sendRemoteCommand(cmdDef) {
     btn.classList.remove('loading');
     btn.textContent = origLabel;
     setRemoteButtonsDisabled(false);
-    setCmdStatus(`📡 Comando enviado ao servidor Jeep! Aguardando confirmação do veículo...`);
+    setCmdStatus(`Comando enviado ao servidor Jeep! Aguardando confirmação do veículo...`);
 
     // ── Polling em background — não bloqueia a UI ────────────────────────────
     pollCommandStatus(_currentVin, correlationId)
       .then(() => {
-        setCmdStatus(`✅ ${cmdDef.label} — confirmado pelo veículo!`, 'ok');
+        setCmdStatus(`${cmdDef.label} — confirmado pelo veículo!`, 'ok');
         if (['REON', 'REOFF'].includes(cmdDef.command)) {
           setTimeout(() => loadData(true), 4000);
         }
@@ -1402,11 +1736,11 @@ async function sendRemoteCommand(cmdDef) {
         const isTimeout = err.message.includes('Sem resposta');
         if (isTimeout) {
           setCmdStatus(
-            `📬 Comando enviado e aguardando veículo. Se o carro estiver sem rede, será executado quando reconectar.`,
+            `Comando enviado e aguardando veículo. Se o carro estiver sem rede, será executado quando reconectar.`,
             'ok'
           );
         } else {
-          setCmdStatus(`❌ ${err.message}`, 'fail');
+          setCmdStatus(`${err.message}`, 'fail');
         }
       });
 
@@ -1418,7 +1752,7 @@ async function sendRemoteCommand(cmdDef) {
     btn.classList.remove('loading');
     btn.textContent = origLabel;
     setRemoteButtonsDisabled(false);
-    setCmdStatus(`❌ ${err.message}`, 'fail');
+    setCmdStatus(`${err.message}`, 'fail');
   }
 }
 
@@ -1431,6 +1765,47 @@ REMOTE_COMMANDS.forEach(cmd => {
 // ─── EVENTS ──────────────────────────────────────────────────────────────────
 el('btn-refresh').addEventListener('click', loadData);
 el('btn-retry')  .addEventListener('click', loadData);
+
+// ─── NAV SCROLL ──────────────────────────────────────────────────────────────
+const NAV_OFFSET = 44 + 52 + 12; // global-nav + sub-nav + folga
+
+document.querySelectorAll('.global-nav-links span[data-scroll]').forEach(link => {
+  link.addEventListener('click', () => {
+    const targetId = link.dataset.scroll;
+    const target   = document.getElementById(targetId);
+
+    if (target) {
+      const top = target.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
+      window.scrollTo({ top, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.querySelectorAll('.global-nav-links span').forEach(s => s.classList.remove('active'));
+    link.classList.add('active');
+  });
+});
+
+// Atualiza link ativo ao rolar
+const _navSections = [
+  { id: 'hero',       link: '[data-scroll="hero"]' },
+  { id: 'sec-status', link: '[data-scroll="sec-status"]' },
+  { id: 'sec-veiculo',link: '[data-scroll="sec-veiculo"]' },
+];
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY + NAV_OFFSET + 40;
+  let current = 'hero';
+  _navSections.forEach(s => {
+    const el = document.getElementById(s.id);
+    if (el && el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s.id;
+  });
+  const activeSection = _navSections.find(s => s.id === current);
+  if (activeSection) {
+    document.querySelectorAll('.global-nav-links span').forEach(s => s.classList.remove('active'));
+    const activeLink = document.querySelector(`.global-nav-links span${activeSection.link}`);
+    if (activeLink) activeLink.classList.add('active');
+  }
+}, { passive: true });
 
 // Auto-load ao abrir
 loadData();

@@ -4,7 +4,9 @@
 # Resultados de testes / exports
 uconnect-result-*.json
 notifications-raw-*.json
-request1.md
 
 # Node
 node_modules/
+
+# Requests capturadas (contêm credenciais)
+request*.md
